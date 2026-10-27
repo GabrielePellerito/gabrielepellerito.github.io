@@ -1,8 +1,8 @@
-// Before CSS: apply saved preference without a flash. Storage may be blocked.
+// An explicit system accessibility preference always takes precedence.
 (() => {
-  let saved;
-  try { saved = localStorage.getItem('gp-theme'); } catch { /* System preference remains available. */ }
-  const dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  document.documentElement.classList.add('js');
+  const root = document.documentElement;
+  let paused = false;
+  try { paused = localStorage.getItem('gp-motion') === 'off'; } catch { /* Storage is optional. */ }
+  if (paused || matchMedia('(prefers-reduced-motion: reduce)').matches) root.dataset.motion = 'off';
+  root.classList.add('js');
 })();

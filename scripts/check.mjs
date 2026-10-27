@@ -5,10 +5,14 @@ import { generate, root } from './update.mjs';
 import { resolve } from 'node:path';
 
 await generate({ check: true });
+const manifest = JSON.parse(await readFile(resolve(root, 'assets/scene-manifest.json'), 'utf8'));
+for (const [key, path] of Object.entries({ source: 'src/scene.js', bundle: 'assets/scene.bundle.js' })) {
+  assert.equal(createHash('sha256').update(await readFile(resolve(root, path))).digest('hex'), manifest[key], 'Scena non sincronizzata: npm.cmd run build:scene');
+}
 const html = await readFile(resolve(root, 'index.html'), 'utf8');
 const data = JSON.parse(await readFile(resolve(root, 'content/site.json'), 'utf8'));
 assert.equal((html.match(/<h1\b/g) || []).length, 1, 'Un solo h1');
-assert.match(html, /<html lang="it">/);
+assert.match(html, /<html lang="it"(?:\s|>)/);
 assert.match(html, /<main id="contenuto"/);
 assert.match(html, /<link rel="canonical"/);
 assert.match(html, /property="og:image"/);

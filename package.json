@@ -10,11 +10,19 @@
     "assets": "node scripts/create-assets.mjs",
     "check": "node scripts/check.mjs",
     "test": "playwright test",
-    "github:status": "node scripts/github.mjs status"
+    "github:status": "node scripts/github.mjs status",
+    "build:scene": "node scripts/build-scene.mjs",
+    "screenshots": "node scripts/capture.mjs",
+    "audit": "node scripts/audit.mjs"
   },
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
-    "@playwright/test": "^1.64.1"
+    "@playwright/test": "^1.64.1",
+    "esbuild": "^0.28.2",
+    "lighthouse": "^13.5.0",
+    "three": "^0.186.1"
   }
 }

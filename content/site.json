@@ -8,16 +8,28 @@
   "seo": {
     "title": "Gabriele Pellerito — Sito personale",
     "description": "Il sito personale di Gabriele Pellerito. Uno spazio per conoscere il mio percorso, le esperienze, i progetti e trovare i miei contatti.",
-    "url": "https://gabrielepellerito.github.io/",
+    "url": "https://gabrielepellerito.com/",
     "language": "it",
     "locale": "it_IT",
     "indexing": true
   },
   "navigation": [
-    { "label": "Chi sono", "id": "chi-sono" },
-    { "label": "Percorso", "id": "percorso" },
-    { "label": "Competenze", "id": "competenze" },
-    { "label": "Progetti", "id": "progetti" }
+    {
+      "label": "Chi sono",
+      "id": "chi-sono"
+    },
+    {
+      "label": "Percorso",
+      "id": "percorso"
+    },
+    {
+      "label": "Competenze",
+      "id": "competenze"
+    },
+    {
+      "label": "Progetti",
+      "id": "progetti"
+    }
   ],
   "ui": {
     "skipLink": "Vai al contenuto",
@@ -96,13 +108,19 @@
       {
         "title": "Competenze",
         "description": "[Da completare] Aggiungi soltanto competenze che possiedi e che vuoi mettere in evidenza.",
-        "items": ["Competenza da inserire", "Ambito da specificare"],
+        "items": [
+          "Competenza da inserire",
+          "Ambito da specificare"
+        ],
         "placeholder": true
       },
       {
         "title": "Interessi",
         "description": "[Da completare] Condividi passioni, temi e attività che senti vicini.",
-        "items": ["Interesse da inserire", "Passione da specificare"],
+        "items": [
+          "Interesse da inserire",
+          "Passione da specificare"
+        ],
         "placeholder": true
       }
     ]
@@ -117,17 +135,31 @@
         "title": "Il prossimo progetto da raccontare",
         "category": "Nome e ambito da inserire",
         "description": "[Da completare] Presenta un progetto reale: l’idea di partenza, il tuo contributo e il risultato.",
-        "tags": ["Categoria da definire"],
+        "tags": [
+          "Categoria da definire"
+        ],
         "url": "",
-        "placeholder": true
+        "placeholder": true,
+        "stack": [],
+        "githubUrl": "",
+        "demoUrl": "",
+        "year": "",
+        "image": null
       },
       {
         "title": "Un’altra idea, il suo percorso",
         "category": "Nome e ambito da inserire",
         "description": "[Da completare] Aggiungi un secondo progetto, con un collegamento pubblico se disponibile.",
-        "tags": ["Categoria da definire"],
+        "tags": [
+          "Categoria da definire"
+        ],
         "url": "",
-        "placeholder": true
+        "placeholder": true,
+        "stack": [],
+        "githubUrl": "",
+        "demoUrl": "",
+        "year": "",
+        "image": null
       }
     ]
   },
@@ -144,5 +176,15 @@
     "copiedLabel": "Email copiata",
     "copyErrorLabel": "Copia non disponibile: usa il collegamento email.",
     "socials": []
+  },
+  "design": {
+    "concept": "dark-editorial-3d",
+    "scheme": "dark",
+    "background": "#080808",
+    "foreground": "#f0efed",
+    "motion": true,
+    "pauseLabel": "Sospendi animazioni",
+    "resumeLabel": "Riprendi animazioni",
+    "baseCommit": "447a6a8"
   }
 }
