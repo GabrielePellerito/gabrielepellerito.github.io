@@ -4,6 +4,7 @@ import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPrivatePath } from './privacy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT || 4174);
@@ -12,7 +13,7 @@ const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
     const parts = pathname.split(/[\\/]/);
-    if (parts.some((part) => part.startsWith('.')) || ['node_modules', 'scripts', 'tests', 'artifacts'].some((part) => parts.includes(part))) {
+    if (isPrivatePath(pathname) || parts.some((part) => part.startsWith('.')) || ['node_modules', 'scripts', 'tests', 'artifacts'].some((part) => parts.includes(part))) {
       response.writeHead(404).end('Risorsa non trovata'); return;
     }
     const path = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);

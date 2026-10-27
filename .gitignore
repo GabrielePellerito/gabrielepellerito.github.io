@@ -7,3 +7,5 @@ artifacts/
 *.log
 .DS_Store
 Thumbs.db
+# Documento di lavoro privato: non pubblicare
+assets/contenuti-cv-sito-gabriele.md

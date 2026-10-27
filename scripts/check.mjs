@@ -3,8 +3,12 @@ import { readFile, access } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { generate, root } from './update.mjs';
 import { resolve } from 'node:path';
+import { assertPrivateSourceNotTracked, privateSource, isPrivatePath } from './privacy.mjs';
 
 await generate({ check: true });
+assertPrivateSourceNotTracked(root);
+assert.ok((await readFile(resolve(root, '.gitignore'), 'utf8')).split(/\r?\n/).includes(privateSource));
+assert.ok(isPrivatePath('/ASSETS/CONTENUTI-CV-SITO-GABRIELE.MD'));
 const manifest = JSON.parse(await readFile(resolve(root, 'assets/scene-manifest.json'), 'utf8'));
 for (const [key, path] of Object.entries({ source: 'src/scene.js', bundle: 'assets/scene.bundle.js' })) {
   assert.equal(createHash('sha256').update(await readFile(resolve(root, path))).digest('hex'), manifest[key], 'Scena non sincronizzata: npm.cmd run build:scene');
@@ -26,6 +30,11 @@ const schemaText = html.match(/<script type="application\/ld\+json">(.*?)<\/scri
 assert.equal(JSON.parse(schemaText).mainEntity.name, data.person.name);
 assert.ok(html.includes(`sha256-${createHash('sha256').update(schemaText).digest('base64')}`), 'CSP coerente con JSON-LD');
 assert.ok(!html.includes('href="#"'), 'Nessun collegamento fittizio');
+assert.ok(!html.includes(privateSource), 'Il documento privato non deve essere collegato dall’HTML');
+const schema = JSON.parse(schemaText);
+assert.equal(schema.mainEntity['@type'], 'Person');
+assert.deepEqual(schema.mainEntity.hasCredential.map((c) => c.name), data.person.credentials.map((c) => c.name));
+for (const property of ['birthDate', 'address', 'telephone', 'email']) assert.ok(!(property in schema.mainEntity));
 for (const file of ['assets/social-card.png', 'assets/favicon-32.png', 'assets/apple-touch-icon.png']) {
   const png = await readFile(resolve(root, file));
   assert.equal(png.readUInt32BE(0), 0x89504e47);
