@@ -2,14 +2,14 @@
 
 Sito statico in italiano, con HTML semantico, CSS e JavaScript senza framework. Stile editoriale avorio e verde bosco, modalità chiara/scura, menu mobile, navigazione da tastiera e animazioni che rispettano `prefers-reduced-motion`.
 
-Questa cartella **`sito-pronto` è il progetto definitivo e ha il proprio repository Git**. È separata dalla cartella superiore perché un altro processo vi stava modificando i file. Una copia di quei file è conservata in `../.workspace-backup/versione-preesistente.zip` e non fa parte di questo repository.
+Il repository contiene direttamente i file statici pubblicabili dal branch `main`, senza build sul server.
 
 ## Visualizzare il sito
 
 Apri PowerShell in questa cartella:
 
 ```powershell
-cd C:\Users\gabri\Desktop\sito-gabriele\sito-pronto
+cd sito-pronto
 node scripts/serve.mjs
 ```
 
@@ -97,9 +97,11 @@ I test avviano il server locale quando necessario e usano Edge. Verificano HTTP,
 
 ## Stato GitHub e prima pubblicazione
 
-Alla preparazione del progetto Git e Git Credential Manager erano disponibili. GitHub CLI (`gh`) non era installata. L’accesso all’account **GabrielePellerito** è stato verificato in sola lettura; nessun repository è stato creato e nessun push è stato eseguito.
+Repository: **`GabrielePellerito/gabrielepellerito.github.io`**.
 
-Proposta: repository pubblico **`GabrielePellerito/gabrielepellerito.github.io`**. Il nome risultava disponibile al controllo; va ricontrollato prima di crearlo. Il suo URL Pages previsto è `https://gabrielepellerito.github.io/`: **non è un URL di pubblicazione verificato**.
+Indirizzo GitHub Pages: **https://gabrielepellerito.github.io/**.
+
+GitHub Pages pubblica dal branch **main**, cartella **/(root)**. Il dominio personalizzato non viene attivato finche non e posseduto e configurato. L'accesso GitHub usa Git Credential Manager; GitHub CLI non e necessaria.
 
 Puoi ricontrollare le credenziali senza mostrarle:
 
@@ -107,7 +109,7 @@ Puoi ricontrollare le credenziali senza mostrarle:
 npm.cmd run github:status
 ```
 
-La creazione del repository pubblico, il push e l’attivazione di Pages richiedono la tua conferma. Per completare manualmente dopo aver deciso di pubblicare:
+Per riprodurre manualmente la prima pubblicazione su un nuovo account o repository:
 
 1. Apri <https://github.com/new> e crea `gabrielepellerito.github.io` nell’account GabrielePellerito, **Public**, senza inizializzarlo con README, licenza o `.gitignore`.
 2. Finché il dominio non è posseduto e configurato, cambia `seo.url` in `content/site.json` in `https://gabrielepellerito.github.io/`, poi esegui `node scripts/update.mjs`. Lascia **CNAME.example** con quel nome: un file `CNAME` attiverebbe il dominio anticipatamente.
