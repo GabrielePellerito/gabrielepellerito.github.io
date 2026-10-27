@@ -1,0 +1,148 @@
+{
+  "person": {
+    "name": "Gabriele Pellerito",
+    "firstName": "Gabriele",
+    "lastName": "Pellerito",
+    "initials": "GP"
+  },
+  "seo": {
+    "title": "Gabriele Pellerito — Sito personale",
+    "description": "Il sito personale di Gabriele Pellerito. Uno spazio per conoscere il mio percorso, le esperienze, i progetti e trovare i miei contatti.",
+    "url": "https://gabrielepellerito.com/",
+    "language": "it",
+    "locale": "it_IT",
+    "indexing": true
+  },
+  "navigation": [
+    { "label": "Chi sono", "id": "chi-sono" },
+    { "label": "Percorso", "id": "percorso" },
+    { "label": "Competenze", "id": "competenze" },
+    { "label": "Progetti", "id": "progetti" }
+  ],
+  "ui": {
+    "skipLink": "Vai al contenuto",
+    "homeLabel": "Torna all’inizio",
+    "menuLabel": "Menu di navigazione",
+    "themeLabel": "Attiva la modalità scura",
+    "contactLabel": "Parliamone",
+    "placeholderLabel": "Da completare",
+    "projectPlaceholderLabel": "Progetto da inserire",
+    "projectLinkLabel": "Scopri il progetto",
+    "backToTop": "Torna in alto",
+    "footerText": "Sito personale",
+    "footerNote": "Uno spazio in continua evoluzione.",
+    "notFound": {
+      "title": "Questa pagina non c’è.",
+      "text": "Il collegamento potrebbe essere cambiato. Riparti dalla pagina principale.",
+      "link": "Torna alla home"
+    }
+  },
+  "hero": {
+    "eyebrow": "Il mio spazio, online",
+    "greeting": "Ciao, sono",
+    "intro": "Benvenuto nel mio sito personale. Qui trovano spazio il mio percorso, le esperienze e i progetti che desidero condividere.",
+    "primaryLabel": "Scopri chi sono",
+    "primaryTarget": "chi-sono",
+    "secondaryLabel": "Esplora i progetti",
+    "secondaryTarget": "progetti",
+    "artLabel": "Una prospettiva personale.",
+    "artCaption": "Idee, esperienze e nuove direzioni.",
+    "bottomLabel": "Una piccola introduzione, un primo incontro.",
+    "scrollLabel": "Scorri per conoscermi"
+  },
+  "about": {
+    "number": "01",
+    "label": "Chi sono",
+    "title": "Una storia da raccontare.",
+    "intro": "Piacere, Gabriele.",
+    "paragraphs": [
+      "[Da completare] Racconta chi sei, di cosa ti occupi e cosa ti ha portato fin qui. Bastano poche righe, con parole che ti rappresentano.",
+      "[Da completare] Aggiungi ciò che ti incuriosisce, i valori che guidano le tue scelte e la direzione che vuoi dare al tuo percorso."
+    ],
+    "noteLabel": "Una nota personale",
+    "note": "[Da completare] Un pensiero, una passione o un dettaglio che vorresti far conoscere di te.",
+    "placeholder": true
+  },
+  "journey": {
+    "number": "02",
+    "label": "Esperienze e formazione",
+    "title": "Le tappe del mio percorso.",
+    "intro": "Questa sezione accoglierà le esperienze e i momenti di formazione che sceglierò di condividere.",
+    "items": [
+      {
+        "period": "Periodo da inserire",
+        "category": "Esperienza",
+        "title": "Esperienza da inserire",
+        "organization": "Organizzazione da specificare",
+        "description": "[Da completare] Descrivi un’esperienza reale, il tuo ruolo e quello che hai imparato. Non sono ancora state inserite esperienze professionali.",
+        "placeholder": true
+      },
+      {
+        "period": "Periodo da inserire",
+        "category": "Formazione",
+        "title": "Percorso di studi da inserire",
+        "organization": "Istituto o ente da specificare",
+        "description": "[Da completare] Inserisci un titolo o un percorso formativo effettivamente seguito, con le informazioni che desideri rendere pubbliche.",
+        "placeholder": true
+      }
+    ]
+  },
+  "skills": {
+    "number": "03",
+    "label": "Competenze e interessi",
+    "title": "Quello che so. Quello che mi incuriosisce.",
+    "intro": "Conoscenze e curiosità raccontano due lati della stessa persona.",
+    "groups": [
+      {
+        "title": "Competenze",
+        "description": "[Da completare] Aggiungi soltanto competenze che possiedi e che vuoi mettere in evidenza.",
+        "items": ["Competenza da inserire", "Ambito da specificare"],
+        "placeholder": true
+      },
+      {
+        "title": "Interessi",
+        "description": "[Da completare] Condividi passioni, temi e attività che senti vicini.",
+        "items": ["Interesse da inserire", "Passione da specificare"],
+        "placeholder": true
+      }
+    ]
+  },
+  "projects": {
+    "number": "04",
+    "label": "Progetti",
+    "title": "Dalle idee alle cose fatte.",
+    "intro": "Uno spazio dedicato ai progetti. Le schede qui sotto sono segnaposto: non descrivono lavori realizzati.",
+    "items": [
+      {
+        "title": "Il prossimo progetto da raccontare",
+        "category": "Nome e ambito da inserire",
+        "description": "[Da completare] Presenta un progetto reale: l’idea di partenza, il tuo contributo e il risultato.",
+        "tags": ["Categoria da definire"],
+        "url": "",
+        "placeholder": true
+      },
+      {
+        "title": "Un’altra idea, il suo percorso",
+        "category": "Nome e ambito da inserire",
+        "description": "[Da completare] Aggiungi un secondo progetto, con un collegamento pubblico se disponibile.",
+        "tags": ["Categoria da definire"],
+        "url": "",
+        "placeholder": true
+      }
+    ]
+  },
+  "contact": {
+    "number": "05",
+    "label": "Contatti",
+    "title": "Le conversazioni iniziano con un ciao.",
+    "intro": "Per un saluto, una domanda o un’idea da condividere.",
+    "email": "",
+    "emailLabel": "Scrivimi un’email",
+    "emptyLabel": "Contatti in arrivo",
+    "emptyText": "[Da completare] L’indirizzo email pubblico e i profili social non sono ancora stati aggiunti.",
+    "copyLabel": "Copia email",
+    "copiedLabel": "Email copiata",
+    "copyErrorLabel": "Copia non disponibile: usa il collegamento email.",
+    "socials": []
+  }
+}
