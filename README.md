@@ -1,6 +1,6 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Concept autonomo sul branch `design/dark-editorial-3d`. Nasce dal commit **447a6a8** di `origin/main`, come `design/light-minimal-3d`. Non è pubblicato sul sito ufficiale. Il branch `main`, il backup `backup/versione-originale-2026-10-27`, il file `CNAME` e la configurazione di Pages non sono stati modificati da questo lavoro.
+Design selezionato per il sito ufficiale **https://gabrielepellerito.com/**, pubblicato da GitHub Pages tramite `main`. Il concept originale rimane nel branch `design/dark-editorial-3d`; la versione Light resta in `design/light-minimal-3d`. Entrambi sono nati dal commit **447a6a8**. Il backup `backup/versione-originale-2026-10-27`, il file `CNAME`, i DNS e la configurazione di Pages sono stati preservati.
 
 ## Direzione visiva
 
@@ -16,7 +16,7 @@ node scripts/serve.mjs
 
 Apri **http://127.0.0.1:4174**. Non occorre installare dipendenze per l’anteprima: HTML, immagini e bundle WebGL sono già inclusi. Ferma il server con `Ctrl+C`. Per una porta diversa: `$env:PORT = '4180'` prima del comando.
 
-I due checkout locali sono `concepts/dark-editorial-3d` e `concepts/light-minimal-3d`, ciascuno sul proprio branch. Il checkout precedente `sito-pronto` rimane sul suo `main` locale.
+I due checkout dei concept sono `concepts/dark-editorial-3d` e `concepts/light-minimal-3d`, ciascuno sul proprio branch. Il checkout `sito-pronto` contiene la versione ufficiale sul branch `main`.
 
 Per lavorare da un clone nuovo:
 
@@ -122,8 +122,18 @@ Le immagini e i report di revisione sono in `artifacts/`, ignorata da Git: `desk
 
 Lighthouse locale: **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, sia desktop sia mobile. LCP circa 1.5 s, CLS 0; TBT 0 ms desktop e 40 ms mobile. È una singola misurazione di laboratorio del caricamento iniziale in questo ambiente, non una garanzia di Core Web Vitals reali né una misura INP sul campo. Il test separato di scroll verifica il percorso WebGL dopo l’interazione.
 
-## Pubblicazione futura
+## Pubblicazione degli aggiornamenti
 
-Il push su questo branch **non pubblica il design**: Pages continua a servire `main`. Gli URL canonici dei concept sono già `https://gabrielepellerito.com/`; questo non modifica DNS, CNAME o impostazioni di hosting. Nessun workflow di deploy viene aggiunto.
+GitHub Pages serve `main`, cartella `/(root)`, sul dominio **https://gabrielepellerito.com/**. Il push sui branch di design non cambia il sito ufficiale. Non occorre un nuovo workflow, un nuovo hosting o una fase di build su GitHub.
 
-Se in futuro scegli questo design, revisiona il diff in una pull request verso `main`, aggiorna prima i contenuti personali e verifica il dominio. Solo dopo una tua decisione esplicita, il merge su `main` attiverà la pubblicazione configurata. Mantieni il CNAME esistente e il backup. Non occorre un nuovo hosting o una fase di build su GitHub.
+Per aggiornare i contenuti della versione ufficiale, lavora su `main` nel checkout `sito-pronto`:
+
+```powershell
+node scripts/update.mjs
+node scripts/check.mjs
+git add .
+git commit -m "Aggiorna sito personale"
+git push
+```
+
+Mantieni il CNAME esistente e il backup. Dopo la distribuzione, verifica il sito pubblico. Eventuali cambi di design dai branch vanno revisionati prima di integrarli in `main`.
