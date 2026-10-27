@@ -8,7 +8,12 @@ export const badge = (d) => `<span class="placeholder-badge">${e(d.ui.placeholde
 export const external = (url, text, className = '') => `<a class="${className}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)}${diagonal}<span class="sr-only"> (nuova scheda)</span></a>`;
 
 export function head(d, { error = false } = {}) {
-  const schema = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: d.seo.url, name: d.seo.title, inLanguage: d.seo.language, mainEntity: { '@type': 'Person', name: d.person.name, url: d.seo.url, ...(d.contact.socials.length ? { sameAs: d.contact.socials.map((s) => s.url) } : {}) } }).replace(/</g, '\\u003c');
+  const person = { '@type': 'Person', name: d.person.name, url: d.seo.url,
+    ...(d.person.description ? { description: d.person.description } : {}),
+    ...(d.person.knowsAbout?.length ? { knowsAbout: d.person.knowsAbout } : {}),
+    ...(d.person.credentials?.length ? { hasCredential: d.person.credentials.map((c) => ({ '@type': 'EducationalOccupationalCredential', name: c.name, credentialCategory: c.category })) } : {}),
+    ...(d.contact.socials.length ? { sameAs: d.contact.socials.map((s) => s.url) } : {}) };
+  const schema = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ProfilePage', url: d.seo.url, name: d.seo.title, inLanguage: d.seo.language, mainEntity: person }).replace(/</g, '\\u003c');
   const asset = error ? `${new URL(d.seo.url).pathname}assets/` : './assets/';
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,11 +34,12 @@ ${!error ? `<link rel="canonical" href="${e(d.seo.url)}">
 <meta property="og:url" content="${e(d.seo.url)}">
 <meta property="og:image" content="${e(d.seo.url)}assets/social-card.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="${e(d.person.name)} — ${e(d.ui.footerText)}">
+<meta property="og:image:alt" content="${e(d.seo.imageAlt || d.person.name + ' — ' + d.ui.footerText)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${e(d.seo.title)}">
 <meta name="twitter:description" content="${e(d.seo.description)}">
-<meta name="twitter:image" content="${e(d.seo.url)}assets/social-card.png">` : ''}
+<meta name="twitter:image" content="${e(d.seo.url)}assets/social-card.png">
+<meta name="twitter:image:alt" content="${e(d.seo.imageAlt || d.person.name + ' — ' + d.ui.footerText)}">` : ''}
 <link rel="icon" type="image/svg+xml" href="${asset}favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="${asset}favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="${asset}apple-touch-icon.png">
@@ -54,7 +60,27 @@ export function project(d, item, index) {
   const stack = item.stack?.length ? item.stack : item.tags;
   const links = !item.placeholder ? [item.githubUrl ? external(item.githubUrl, 'GitHub') : '', item.demoUrl ? external(item.demoUrl, 'Demo') : '', item.url && !item.githubUrl && !item.demoUrl ? external(item.url, d.ui.projectLinkLabel) : ''].join('') : '';
   const media = item.image?.src ? `<img src="${e(item.image.src)}" alt="${e(item.image.alt || item.title)}" width="${e(item.image.width || 1200)}" height="${e(item.image.height || 800)}" loading="lazy" decoding="async">` : `<div class="project-object object-${index % 2}" aria-hidden="true"><i></i><i></i><i></i></div>`;
-  return `<article class="project-card reveal" data-tilt><div class="project-media">${media}<span class="project-index">0${index + 1}</span><span class="project-media-label">${e(item.placeholder ? d.ui.projectPlaceholderLabel : item.category)}</span></div><div class="project-info"><div class="project-category"><span>${e(item.category)}${item.year ? ' / ' + e(item.year) : ''}</span>${item.placeholder ? badge(d) : ''}</div><h3>${e(item.title)}</h3><p>${e(item.description)}</p><ul class="tags">${stack.map((t) => `<li>${e(t)}</li>`).join('')}</ul>${links ? `<div class="project-links">${links}</div>` : ''}</div></article>`;
+  return `<article class="project-card reveal" data-tilt><div class="project-media">${media}<span class="project-index">0${index + 1}</span><span class="project-media-label">${e(item.visualLabel || (item.placeholder ? d.ui.projectPlaceholderLabel : item.category))}</span></div><div class="project-info"><div class="project-category"><span>${e(item.category)}${item.year ? ' / ' + e(item.year) : ''}</span>${item.placeholder ? badge(d) : ''}</div>${item.organization ? `<p class="project-organization">${e(item.organization)}</p>` : ''}<h3>${e(item.title)}</h3><p>${e(item.description)}</p><ul class="tags">${stack.map((t) => `<li>${e(t)}</li>`).join('')}</ul>${links ? `<div class="project-links">${links}</div>` : ''}${item.availabilityNote ? `<p class="project-availability">${e(item.availabilityNote)}</p>` : ''}</div></article>`;
+}
+
+export function journey(d, mode) {
+  const groups = d.journey.groups || [{ id: '', label: '' }];
+  const itemMarkup = (item, index, grouped) => {
+    const level = grouped ? 'h4' : 'h3';
+    const organization = `<p class="organization">${e(item.organization)}${item.location ? `<span class="timeline-location"> / ${e(item.location)}</span>` : ''}</p>`;
+    const details = `<p>${e(item.description)}</p>${item.activities?.length ? `<ul class="activity-list" aria-label="Attività e ambiti">${item.activities.map((a) => `<li>${e(a)}</li>`).join('')}</ul>` : ''}${item.status ? `<div class="timeline-status"><span class="status-badge">${e(item.status)}</span><p>${e(item.statusDetail)}</p></div>` : ''}${item.placeholder ? badge(d) : ''}`;
+    const title = `<${level}>${e(item.title)}</${level}>`;
+    return mode === 'light' ? `<li class="timeline-item reveal"><div class="timeline-meta"><span class="timeline-count" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span><span>${e(item.period)}</span></div><div class="timeline-main"><p class="timeline-category">${e(item.category)}</p>${title}${organization}</div><div class="timeline-description">${details}</div></li>` : `<li class="timeline-item reveal"><div class="timeline-meta"><span>${e(item.period)}</span><span>${e(item.category)}</span></div>${title}${organization}<div class="timeline-description">${details}</div></li>`;
+  };
+  return `<div class="journey-lists">${groups.map((group) => `<div class="journey-group">${group.label ? `<h3 class="journey-group-title" id="percorso-${e(group.id)}">${e(group.label)}</h3>` : ''}<ol class="timeline">${d.journey.items.filter((i) => !group.id || i.group === group.id).map((item, index) => itemMarkup(item, index, Boolean(group.label))).join('')}</ol></div>`).join('')}${d.journey.sourceNote ? `<p class="journey-source-note">${e(d.journey.sourceNote)}</p>` : ''}</div>`;
+}
+
+export function skillGroups(d) {
+  return `<div class="skills-grid">${d.skills.groups.map((g, index) => `<article class="skill-group reveal"><div class="skill-header"><span class="skill-number" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>${g.placeholder ? badge(d) : ''}</div><h3>${e(g.title)}</h3><p>${e(g.description)}</p><ul class="skill-list">${g.items.map((item) => typeof item === 'string' ? `<li>${e(item)}</li>` : `<li class="language-item"><span>${e(item.name)}</span><span class="language-level">${e(item.level)}</span></li>`).join('')}</ul></article>`).join('')}</div>${d.skills.interestsText ? `<aside class="interests-note reveal"><h3>${e(d.skills.interestsTitle)}</h3><p>${e(d.skills.interestsText)}</p></aside>` : ''}`;
+}
+
+export function moreProjects(d) {
+  return d.projects.moreText ? `<aside class="projects-empty reveal"><span aria-hidden="true">+</span><div><h3>${e(d.projects.moreTitle)}</h3><p>${e(d.projects.moreText)}</p></div></aside>` : '';
 }
 
 export function contacts(d) {
