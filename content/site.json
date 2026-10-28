@@ -3,15 +3,29 @@
     "name": "Gabriele Pellerito",
     "firstName": "Gabriele",
     "lastName": "Pellerito",
-    "initials": "GP"
+    "initials": "GP",
+    "description": "Profilo tecnico con esperienze nello sviluppo web, nella manutenzione di sistemi informatici e nella riparazione di dispositivi elettronici.",
+    "knowsAbout": [
+      "Sviluppo web",
+      "Manutenzione hardware",
+      "Reti locali",
+      "Diagnosi di dispositivi elettronici"
+    ],
+    "credentials": [
+      {
+        "name": "Qualifica di Operatore informatico",
+        "category": "Qualifica professionale"
+      }
+    ]
   },
   "seo": {
-    "title": "Gabriele Pellerito — Sito personale",
-    "description": "Il sito personale di Gabriele Pellerito. Uno spazio per conoscere il mio percorso, le esperienze, i progetti e trovare i miei contatti.",
+    "title": "Gabriele Pellerito | Informatica, programmazione e IoT",
+    "description": "Scopri il percorso di Gabriele Pellerito tra sviluppo web, sistemi e reti, IoT, elettronica, esperienze tecniche e progetti.",
     "url": "https://gabrielepellerito.com/",
     "language": "it",
     "locale": "it_IT",
-    "indexing": true
+    "indexing": true,
+    "imageAlt": "Gabriele Pellerito — informatica, programmazione e IoT. Composizione scultorea monocromatica."
   },
   "navigation": [
     {
@@ -50,128 +64,308 @@
     }
   },
   "hero": {
-    "eyebrow": "Il mio spazio, online",
+    "eyebrow": "Informatica · Programmazione · IoT",
     "greeting": "Ciao, sono",
-    "intro": "Benvenuto nel mio sito personale. Qui trovano spazio il mio percorso, le esperienze e i progetti che desidero condividere.",
-    "primaryLabel": "Scopri chi sono",
-    "primaryTarget": "chi-sono",
-    "secondaryLabel": "Esplora i progetti",
-    "secondaryTarget": "progetti",
-    "artLabel": "Una prospettiva personale.",
-    "artCaption": "Idee, esperienze e nuove direzioni.",
-    "bottomLabel": "Una piccola introduzione, un primo incontro.",
+    "intro": "Mi appassiona trasformare problemi complessi in soluzioni concrete. Mi occupo di informatica, programmazione e tecnologie connesse, con un interesse particolare per l’IoT, lo sviluppo web e il mondo hardware.",
+    "primaryLabel": "Scopri il mio percorso",
+    "primaryTarget": "percorso",
+    "secondaryLabel": "Esplora le esperienze",
+    "secondaryTarget": "percorso-esperienze",
+    "artLabel": "Informatica, programmazione e IoT.",
+    "artCaption": "Sviluppo web, reti ed elettronica.",
+    "bottomLabel": "Curiosità, precisione e voglia di imparare.",
     "scrollLabel": "Scorri per conoscermi"
   },
   "about": {
     "number": "01",
     "label": "Chi sono",
-    "title": "Una storia da raccontare.",
-    "intro": "Piacere, Gabriele.",
+    "title": "Curiosità tecnica, approccio concreto.",
+    "intro": "Tra informatica ed elettronica.",
     "paragraphs": [
-      "[Da completare] Racconta chi sei, di cosa ti occupi e cosa ti ha portato fin qui. Bastano poche righe, con parole che ti rappresentano.",
-      "[Da completare] Aggiungi ciò che ti incuriosisce, i valori che guidano le tue scelte e la direzione che vuoi dare al tuo percorso."
+      "Sono una persona curiosa e determinata, appassionata di tecnologia e problem solving. Mi piace affrontare problemi articolati, comprenderne il funzionamento e trovare soluzioni attraverso la programmazione e l’esperienza pratica.",
+      "Il mio interesse nasce dall’incontro tra informatica ed elettronica: sviluppo web, reti, dispositivi, automazione e manutenzione hardware sono ambiti che ho potuto esplorare durante il percorso formativo e le esperienze professionali."
     ],
     "noteLabel": "Una nota personale",
-    "note": "[Da completare] Un pensiero, una passione o un dettaglio che vorresti far conoscere di te.",
-    "placeholder": true
+    "note": "Credo nell’apprendimento continuo: ogni progetto è un’occasione per capire qualcosa in più, sperimentare e migliorare.",
+    "placeholder": false
   },
   "journey": {
     "number": "02",
     "label": "Esperienze e formazione",
-    "title": "Le tappe del mio percorso.",
-    "intro": "Questa sezione accoglierà le esperienze e i momenti di formazione che sceglierò di condividere.",
+    "title": "Esperienze concrete, nuove prospettive.",
+    "intro": "Sviluppo web, sistemi informatici ed elettronica: un percorso che unisce pratica, formazione e contesti internazionali.",
     "items": [
       {
-        "period": "Periodo da inserire",
-        "category": "Esperienza",
-        "title": "Esperienza da inserire",
-        "organization": "Organizzazione da specificare",
-        "description": "[Da completare] Descrivi un’esperienza reale, il tuo ruolo e quello che hai imparato. Non sono ancora state inserite esperienze professionali.",
-        "placeholder": true
+        "group": "esperienze",
+        "period": "23 giugno – 1 luglio 2024",
+        "category": "Tirocinio Erasmus",
+        "title": "Tirocinio tecnico in elettronica",
+        "organization": "Info Servi Canarias S.L.",
+        "location": "Las Palmas de Gran Canaria, Spagna",
+        "description": "Durante un’esperienza Erasmus ho svolto attività di diagnosi, manutenzione e riparazione di dispositivi elettronici, tra cui computer e televisori. Il tirocinio mi ha permesso di approfondire la ricerca dei guasti e il lavoro tecnico in un contesto internazionale.",
+        "activities": [
+          "Diagnosi e ricerca dei guasti",
+          "Riparazione di dispositivi",
+          "Contesto internazionale"
+        ],
+        "placeholder": false
       },
       {
-        "period": "Periodo da inserire",
+        "group": "esperienze",
+        "period": "13 novembre 2023 – 26 gennaio 2024",
+        "category": "Esperienza professionale",
+        "title": "Sviluppatore web",
+        "organization": "Gruppo Digi",
+        "location": "Milano",
+        "description": "Ho contribuito alla realizzazione di un sito di prenotazione per uno spazio di coworking, occupandomi di flowchart, personalizzazione del tema, implementazione e configurazione di plugin, SEO e gestione tecnica del sito e del relativo hosting. Ho inoltre svolto attività di risoluzione di problemi server, sicurezza della rete dell’hosting, manutenzione e assemblaggio di computer.",
+        "activities": [
+          "Sviluppo web e plugin",
+          "SEO e gestione hosting",
+          "Manutenzione hardware"
+        ],
+        "placeholder": false
+      },
+      {
+        "group": "esperienze",
+        "period": "25 gennaio – 1 aprile 2023",
+        "category": "Tirocinio",
+        "title": "Tirocinante informatico ed elettronico",
+        "organization": "Alfapi",
+        "location": "Milano",
+        "description": "Ho collaborato allo sviluppo di siti web e ad attività di manutenzione di computer e reti.",
+        "activities": [
+          "Sviluppo web",
+          "Manutenzione di computer e reti"
+        ],
+        "placeholder": false
+      },
+      {
+        "group": "esperienze",
+        "period": "6 aprile – 12 giugno 2022",
+        "category": "Tirocinio",
+        "title": "Tirocinante informatico ed elettronico",
+        "organization": "San Marino Mail",
+        "location": "Milano",
+        "description": "Ho supportato lo sviluppo di applicazioni e la manutenzione di server e ambienti informatici d’ufficio.",
+        "activities": [
+          "Sviluppo di applicazioni",
+          "Manutenzione di server"
+        ],
+        "placeholder": false
+      },
+      {
+        "group": "formazione",
+        "period": "Dal 12 settembre 2023",
         "category": "Formazione",
-        "title": "Percorso di studi da inserire",
-        "organization": "Istituto o ente da specificare",
-        "description": "[Da completare] Inserisci un titolo o un percorso formativo effettivamente seguito, con le informazioni che desideri rendere pubbliche.",
-        "placeholder": true
+        "title": "Percorso di Tecnico informatico di sistemi, reti e data management",
+        "organization": "Galdus",
+        "location": "Milano",
+        "description": "Percorso formativo orientato a sistemi informatici, reti e gestione dei dati.",
+        "activities": [
+          "Sistemi informatici",
+          "Reti",
+          "Gestione dei dati"
+        ],
+        "status": "Stato da aggiornare",
+        "statusDetail": "Indicato come in corso nel CV del 14 aprile 2025. Stato ed eventuale conclusione nel 2026 da verificare.",
+        "placeholder": false
+      },
+      {
+        "group": "formazione",
+        "period": "Dal 12 settembre 2023",
+        "category": "Formazione",
+        "title": "Percorso di robotica ABB",
+        "organization": "Galdus",
+        "location": "Milano",
+        "description": "Percorso di robotica che cita l’utilizzo di ABB RobotStudio. Il CV non attesta il completamento del patentino.",
+        "activities": [
+          "ABB RobotStudio"
+        ],
+        "status": "Stato da aggiornare",
+        "statusDetail": "Indicato come attivo nel CV del 14 aprile 2025. Il conseguimento del patentino è da verificare.",
+        "placeholder": false
+      },
+      {
+        "group": "formazione",
+        "period": "Luglio 2023",
+        "category": "Studio internazionale",
+        "title": "Esperienza di studio a New York",
+        "organization": "Wagner College",
+        "location": "Staten Island, New York, Stati Uniti",
+        "description": "Un soggiorno di studio di circa 30 giorni, ottenuto attraverso una borsa di studio, che ha rafforzato l’uso dell’inglese e la capacità di adattarmi a un ambiente internazionale.",
+        "activities": [
+          "Borsa di studio",
+          "Inglese in un contesto internazionale"
+        ],
+        "placeholder": false
+      },
+      {
+        "group": "formazione",
+        "period": "7 settembre 2020 – 20 giugno 2023",
+        "category": "Qualifica professionale",
+        "title": "Qualifica di Operatore informatico",
+        "organization": "Galdus",
+        "location": "Milano",
+        "description": "Conseguimento della qualifica di Operatore informatico.",
+        "activities": [],
+        "placeholder": false
+      }
+    ],
+    "sourceNote": "Percorso ricostruito dal CV del 14 aprile 2025. Gli stati formativi successivi a quella data sono da verificare.",
+    "groups": [
+      {
+        "id": "esperienze",
+        "label": "Esperienze professionali"
+      },
+      {
+        "id": "formazione",
+        "label": "Formazione e mobilità internazionale"
       }
     ]
   },
   "skills": {
     "number": "03",
     "label": "Competenze e interessi",
-    "title": "Quello che so. Quello che mi incuriosisce.",
-    "intro": "Conoscenze e curiosità raccontano due lati della stessa persona.",
+    "title": "Competenze, strumenti e curiosità.",
+    "intro": "Conoscenze sviluppate tra formazione ed esperienze pratiche. I livelli indicati sono quelli dichiarati nel CV del 2025.",
     "groups": [
       {
-        "title": "Competenze",
-        "description": "[Da completare] Aggiungi soltanto competenze che possiedi e che vuoi mettere in evidenza.",
+        "title": "Programmazione e sviluppo web",
+        "description": "Dal codice alle applicazioni e alla personalizzazione dei siti.",
         "items": [
-          "Competenza da inserire",
-          "Ambito da specificare"
+          "HTML e CSS",
+          "Bootstrap — conoscenze intermedie dichiarate",
+          "JavaScript — conoscenze di base dichiarate",
+          "WordPress e personalizzazione di plugin",
+          "Sviluppo di applicazioni Android",
+          "SEO e gestione tecnica di siti web"
         ],
-        "placeholder": true
+        "placeholder": false
       },
       {
-        "title": "Interessi",
-        "description": "[Da completare] Condividi passioni, temi e attività che senti vicini.",
+        "title": "Sistemi e reti",
+        "description": "Configurazione e manutenzione di ambienti informatici.",
         "items": [
-          "Interesse da inserire",
-          "Passione da specificare"
+          "Reti locali — conoscenze intermedie dichiarate",
+          "Manutenzione di server",
+          "Cablaggio Ethernet",
+          "Gestione tecnica di hosting",
+          "Risoluzione di problemi server e reti"
         ],
-        "placeholder": true
+        "placeholder": false
+      },
+      {
+        "title": "Hardware ed elettronica",
+        "description": "Un approccio pratico alla ricerca dei guasti e alla riparazione.",
+        "items": [
+          "Assemblaggio, manutenzione e riparazione PC",
+          "Diagnosi e ricerca dei guasti",
+          "Manutenzione di dispositivi elettronici",
+          "Troubleshooting hardware"
+        ],
+        "placeholder": false
+      },
+      {
+        "title": "IoT e automazione",
+        "description": "Dispositivi connessi e automazione come ambiti di interesse e apprendimento.",
+        "items": [
+          "IoT — interesse e ambito di approfondimento",
+          "Arduino",
+          "ABB RobotStudio"
+        ],
+        "placeholder": false
+      },
+      {
+        "title": "Software e strumenti",
+        "description": "Strumenti creativi, grafica e modellazione.",
+        "items": [
+          "Blender — utilizzo di base",
+          "Adobe Photoshop",
+          "Adobe Illustrator",
+          "Adobe Dreamweaver"
+        ],
+        "placeholder": false
+      },
+      {
+        "title": "Lingue",
+        "description": "Livelli dichiarati nel CV del 14 aprile 2025; non attestano certificazioni linguistiche.",
+        "items": [
+          {
+            "name": "Italiano",
+            "level": "Madrelingua"
+          },
+          {
+            "name": "Inglese",
+            "level": "C1"
+          },
+          {
+            "name": "Spagnolo",
+            "level": "B1"
+          },
+          {
+            "name": "Francese",
+            "level": "A2"
+          }
+        ],
+        "placeholder": false
+      },
+      {
+        "title": "Soft skills",
+        "description": "Un modo di lavorare orientato alla comprensione dei problemi e al miglioramento continuo.",
+        "items": [
+          "Problem solving",
+          "Pianificazione",
+          "Lavoro di squadra",
+          "Capacità di apprendimento",
+          "Curiosità e determinazione"
+        ],
+        "placeholder": false
       }
-    ]
+    ],
+    "interestsTitle": "Oltre le competenze",
+    "interestsText": "Mi interessano elettronica, automazione, IoT, programmazione, grafica 2D/3D e riparazione hardware. Fuori dall’informatica coltivo l’interesse per palestra, calcio e bicicletta."
   },
   "projects": {
     "number": "04",
     "label": "Progetti",
-    "title": "Dalle idee alle cose fatte.",
-    "intro": "Uno spazio dedicato ai progetti. Le schede qui sotto sono segnaposto: non descrivono lavori realizzati.",
+    "title": "Un contributo concreto allo sviluppo web.",
+    "intro": "Un’attività documentata del mio percorso professionale. Il contributo è distinto dai progetti personali e non viene presentato come un lavoro svolto interamente da solo.",
     "items": [
       {
-        "title": "Il prossimo progetto da raccontare",
-        "category": "Nome e ambito da inserire",
-        "description": "[Da completare] Presenta un progetto reale: l’idea di partenza, il tuo contributo e il risultato.",
+        "title": "Sistema web di prenotazione per coworking",
+        "category": "Contributo professionale",
+        "organization": "Gruppo Digi",
+        "year": "2023–2024",
+        "description": "Contributo alla realizzazione di un sito per la gestione delle prenotazioni di un coworking, con personalizzazione del tema, implementazione e configurazione di plugin, flowchart, SEO e gestione tecnica.",
         "tags": [
-          "Categoria da definire"
+          "Flowchart",
+          "Personalizzazione del tema",
+          "Plugin",
+          "SEO",
+          "Gestione tecnica"
         ],
-        "url": "",
-        "placeholder": true,
         "stack": [],
+        "url": "",
         "githubUrl": "",
         "demoUrl": "",
-        "year": "",
-        "image": null
-      },
-      {
-        "title": "Un’altra idea, il suo percorso",
-        "category": "Nome e ambito da inserire",
-        "description": "[Da completare] Aggiungi un secondo progetto, con un collegamento pubblico se disponibile.",
-        "tags": [
-          "Categoria da definire"
-        ],
-        "url": "",
-        "placeholder": true,
-        "stack": [],
-        "githubUrl": "",
-        "demoUrl": "",
-        "year": "",
-        "image": null
+        "image": null,
+        "placeholder": false,
+        "visualLabel": "Composizione astratta · non è un’anteprima del sito",
+        "availabilityNote": "Nessun repository o collegamento pubblico è documentato. Lo stack del progetto è da confermare."
       }
-    ]
+    ],
+    "moreTitle": "Progetti personali",
+    "moreText": "Altri progetti in aggiornamento. Saranno aggiunti soltanto lavori documentati e condivisibili."
   },
   "contact": {
     "number": "05",
     "label": "Contatti",
-    "title": "Le conversazioni iniziano con un ciao.",
-    "intro": "Per un saluto, una domanda o un’idea da condividere.",
+    "title": "Parliamo di idee, tecnologia e progetti.",
+    "intro": "Per collaborazioni, opportunità professionali o semplicemente per confrontarci su un’idea.",
     "email": "",
     "emailLabel": "Scrivimi un’email",
-    "emptyLabel": "Contatti in arrivo",
-    "emptyText": "[Da completare] L’indirizzo email pubblico e i profili social non sono ancora stati aggiunti.",
+    "emptyLabel": "Contatti in aggiornamento",
+    "emptyText": "I canali pubblici di contatto saranno disponibili prossimamente.",
     "copyLabel": "Copia email",
     "copiedLabel": "Email copiata",
     "copyErrorLabel": "Copia non disponibile: usa il collegamento email.",

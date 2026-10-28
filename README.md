@@ -1,6 +1,6 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Design selezionato per il sito ufficiale **https://gabrielepellerito.com/**, pubblicato da GitHub Pages tramite `main`. Il concept originale rimane nel branch `design/dark-editorial-3d`; la versione Light resta in `design/light-minimal-3d`. Entrambi sono nati dal commit **447a6a8**. Il backup `backup/versione-originale-2026-10-27`, il file `CNAME`, i DNS e la configurazione di Pages sono stati preservati.
+Versione ufficiale Dark Editorial 3D, pubblicata da GitHub Pages tramite `main` su **https://gabrielepellerito.com/**. Include i contenuti professionali ricavati dal CV del 14 aprile 2025. I percorsi formativi da confermare sono segnalati; il documento originale rimane privato. I branch Dark e Light, il backup, CNAME e configurazione di Pages sono preservati.
 
 ## Direzione visiva
 
@@ -16,7 +16,7 @@ node scripts/serve.mjs
 
 Apri **http://127.0.0.1:4174**. Non occorre installare dipendenze per l’anteprima: HTML, immagini e bundle WebGL sono già inclusi. Ferma il server con `Ctrl+C`. Per una porta diversa: `$env:PORT = '4180'` prima del comando.
 
-I due checkout dei concept sono `concepts/dark-editorial-3d` e `concepts/light-minimal-3d`, ciascuno sul proprio branch. Il checkout `sito-pronto` contiene la versione ufficiale sul branch `main`.
+I due checkout locali sono `concepts/dark-editorial-3d` e `concepts/light-minimal-3d`, ciascuno sul proprio branch. Il checkout precedente `sito-pronto` rimane sul suo `main` locale.
 
 Per lavorare da un clone nuovo:
 
@@ -57,7 +57,7 @@ Le schede progetto supportano i campi esistenti `title`, `description`, `categor
 }
 ```
 
-Questo è uno schema di esempio, non un progetto personale. Senza `stack` si usano i `tags`; senza immagine appare una geometria decorativa, esplicitamente segnaposto. I link sono mostrati solo per schede non segnaposto. Immagini locali con dimensioni obbligatorie evitano richieste a terzi e riducono CLS; i collegamenti esterni devono essere HTTPS.
+Questo è uno schema di esempio, non un progetto personale. Senza `stack` si usano i `tags`; senza immagine appare una geometria decorativa indicata come composizione astratta. I link sono mostrati solo per schede non segnaposto. Immagini locali con dimensioni obbligatorie evitano richieste a terzi e riducono CLS; i collegamenti esterni devono essere HTTPS.
 
 ## 3D e movimento
 
@@ -116,24 +116,58 @@ npm.cmd run audit
 
 Le immagini e i report di revisione sono in `artifacts/`, ignorata da Git: `desktop.png`, `mobile.png`, versioni a pagina intera, report Lighthouse HTML/JSON. Edge installato è il browser di default; con Chrome imposta `$env:BROWSER_CHANNEL = 'chrome'`. Lighthouse usa `CHROME_PATH` quando fornito. Il comando `assets` richiede WebGL per catturare la scultura effettiva; non genera una sostituzione generica.
 
+## Contenuti professionali e privacy
+
+I contenuti sono un adattamento editoriale del CV del **14 aprile 2025**, con gli stessi fatti nei due branch di design. Sono documentati quattro incarichi/tirocini (Info Servi Canarias S.L., Gruppo Digi, Alfapi, San Marino Mail), la qualifica di Operatore informatico, i due percorsi Galdus da verificare e l’esperienza di studio al Wagner College. Il progetto coworking è presentato come **contributo professionale**, senza stack, repository o demo inventati.
+
+I percorsi di Tecnico informatico e robotica ABB, indicati come attivi nella fonte del 2025, mostrano **Stato da aggiornare**. Non si dichiara che proseguano nel 2026 o che siano stati completati. Il patentino ABB non è presentato come conseguito. I livelli linguistici dichiarati sono italiano madrelingua, inglese C1, spagnolo B1 e francese A2, senza attribuire certificazioni.
+
+Da verificare con il proprietario prima di ulteriori aggiornamenti:
+
+- stato e possibili date di conclusione dei due percorsi Galdus;
+- stack e possibilità di citare un collegamento pubblico al sito coworking;
+- eventuali esperienze e progetti successivi al 14 aprile 2025;
+- email e profili social che si desidera autorizzare per la pubblicazione.
+
+Email e social rimangono vuoti. Non sono stati aggiunti telefono, indirizzo privato o data di nascita. Il JSON-LD pubblica soltanto il profilo tecnico e la qualifica di Operatore informatico confermata, senza ruoli attuali o titoli accademici non attestati.
+
+Il documento `assets/contenuti-cv-sito-gabriele.md` è **privato**: escluso tramite `.gitignore`, non tracciato e non collegato dall’HTML. Non è stato copiato negli asset dei checkout di design. I due worktree leggono la medesima fonte locale fuori dai rispettivi alberi pubblicabili; un’esclusione Git locale protegge anche la copia di lavoro già esistente nel checkout principale. Il server di anteprima nega le richieste al documento, incluse varianti maiuscole e URL codificati. `.gitignore` da solo non sarebbe una protezione HTTP e non rimuoverebbe un file già tracciato: i controlli verificano entrambi gli aspetti.
+
+Per il riesame locale, senza copiare la fonte:
+
+```powershell
+node scripts/check-cv.mjs --compare ../light-minimal-3d
+```
+
+Dal checkout Light usa invece `--compare ../dark-editorial-3d`. In una struttura diversa puoi impostare `CV_SOURCE` sul percorso locale del documento. Questo comando non è necessario per generare il sito: la fonte privata non è richiesta ai visitatori o in un clone pubblico. `scripts/check.mjs` impedisce invece che il documento venga incluso tra i file tracciati.
+
+Le due timeline distinguono esperienza e formazione. Le sette categorie di competenze usano elenchi e livelli dichiarati, senza barre percentuali arbitrarie. Le rappresentazioni geometriche dei progetti sono indicate come astratte, senza fingere un’anteprima reale. Le scene Three.js, i relativi bundle e i prerender delle sculture sono rimasti invariati.
+
+Per rigenerare soltanto l’immagine social con i nuovi testi, mantenendo i prerender 3D:
+
+```powershell
+node scripts/create-assets.mjs --social-only
+```
+
+
 ## Verifiche registrate
 
-18 test Playwright superati su Edge/Chromium desktop e smartphone: risorse/console, rotazione reale sullo scroll, stabilizzazione, pausa e persistenza, movimento ridotto senza download WebGL, menu/focus, sezione attiva, 320/375/768/1440/1920 px, assenza di JS/WebGL, perdita del contesto, 404 e SEO. Axe non rileva violazioni nei controlli WCAG 2.2 AA applicati, inclusa la navigazione mobile aperta. Non è una certificazione manuale di conformità.
+28 test Playwright superati su Edge/Chromium desktop e smartphone: risorse/console, rotazione reale sullo scroll, stabilizzazione, pausa e persistenza, movimento ridotto senza download WebGL, menu/focus, sezione attiva, 320/375/768/1440/1920 px, assenza di JS/WebGL, perdita del contesto, 404 e SEO. Axe non rileva violazioni nei controlli WCAG 2.2 AA applicati, inclusa la navigazione mobile aperta. Non è una certificazione manuale di conformità.
 
-Lighthouse locale: **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, sia desktop sia mobile. LCP circa 1.5 s, CLS 0; TBT 0 ms desktop e 40 ms mobile. È una singola misurazione di laboratorio del caricamento iniziale in questo ambiente, non una garanzia di Core Web Vitals reali né una misura INP sul campo. Il test separato di scroll verifica il percorso WebGL dopo l’interazione.
+Lighthouse locale: **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, sia desktop sia mobile. LCP circa 1.7 s desktop e 1.5 s mobile, CLS 0; TBT 0 ms su entrambi. È una singola misurazione di laboratorio del caricamento iniziale in questo ambiente, non una garanzia di Core Web Vitals reali né una misura INP sul campo. Il test separato di scroll verifica il percorso WebGL dopo l’interazione.
 
 ## Pubblicazione degli aggiornamenti
 
-GitHub Pages serve `main`, cartella `/(root)`, sul dominio **https://gabrielepellerito.com/**. Il push sui branch di design non cambia il sito ufficiale. Non occorre un nuovo workflow, un nuovo hosting o una fase di build su GitHub.
+GitHub Pages serve `main`, cartella `/(root)`, sul dominio **https://gabrielepellerito.com/**. I push sui branch di design non modificano il sito ufficiale. Non occorrono nuovi workflow o servizi di hosting.
 
-Per aggiornare i contenuti della versione ufficiale, lavora su `main` nel checkout `sito-pronto`:
+Dal checkout `sito-pronto`, dopo aver modificato i contenuti pubblici:
 
 ```powershell
 node scripts/update.mjs
 node scripts/check.mjs
-git add .
+git add content/site.json index.html 404.html robots.txt sitemap.xml assets/favicon.svg
 git commit -m "Aggiorna sito personale"
-git push
+git push origin main
 ```
 
-Mantieni il CNAME esistente e il backup. Dopo la distribuzione, verifica il sito pubblico. Eventuali cambi di design dai branch vanno revisionati prima di integrarli in `main`.
+Se modifichi altri asset o componenti, aggiungili esplicitamente dopo averli revisionati. Non includere il documento privato del CV. Mantieni il CNAME e il backup e verifica il sito pubblico dopo la distribuzione.
