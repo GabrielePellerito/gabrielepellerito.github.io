@@ -11,7 +11,7 @@ export function renderSite(d) {
     <div class="container hero-meta"><p class="eyebrow">${e(d.hero.eyebrow)}</p><span class="edition">${e(d.ui.footerText)} / 01</span></div>
     <div class="hero-stage container">
       <div class="hero-title-wrap"><p class="hero-greeting">${e(d.hero.greeting)}</p><h1 id="hero-title"><span>${e(d.person.firstName)}</span> <span class="outline-name">${e(d.person.lastName)}<span class="name-dot">.</span></span></h1></div>
-      ${sculpture(d)}<span class="scene-coordinate" aria-hidden="true">${e(d.person.initials)} — FIG. 001 / ∞</span>
+      ${sculpture(d)}<span class="scene-coordinate" aria-hidden="true">${e(d.hero.artLabel)} / 3 DOF</span>
     </div>
     <div class="container hero-bottom"><div class="hero-description"><span class="tiny-cross" aria-hidden="true">+</span><p>${e(d.hero.intro)}</p></div><div class="hero-buttons"><a class="button button-primary" href="#${e(d.hero.primaryTarget)}">${e(d.hero.primaryLabel)}${arrow}</a><a class="text-link" href="#${e(d.hero.secondaryTarget)}">${e(d.hero.secondaryLabel)}${diagonal}</a></div><a class="scroll-cue" href="#chi-sono"><span>${e(d.hero.scrollLabel)}</span>${arrow}</a></div>
   </section>

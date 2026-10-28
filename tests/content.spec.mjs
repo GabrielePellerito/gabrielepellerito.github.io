@@ -27,13 +27,17 @@ test('sette categorie e livelli linguistici dichiarati, senza certificazioni inv
 
 test('un contributo professionale reale, nessun link o contatto non autorizzato', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto('/');
-  await expect(page.locator('.project-card')).toHaveCount(1);
-  await expect(page.locator('.project-card')).toContainText('Sistema web di prenotazione per coworking');
-  await expect(page.locator('.project-category')).toContainText('Contributo professionale');
-  await expect(page.locator('.project-card')).toContainText('Gruppo Digi');
+  await expect(page.locator('.project-card')).toHaveCount(2);
+  const contribution = page.locator('.project-card').filter({ hasText: 'Sistema web di prenotazione per coworking' });
+  await expect(contribution.locator('.project-category')).toContainText('Contributo professionale');
+  await expect(contribution).toContainText('Gruppo Digi');
   await expect(page.locator('.project-links')).toHaveCount(0);
-  await expect(page.locator('.project-card')).not.toContainText('WordPress');
-  await expect(page.locator('.projects-empty')).toContainText('Progetti personali');
+  await expect(contribution).not.toContainText('WordPress');
+  const robot = page.locator('.project-card').filter({ hasText: 'Braccio robotico articolato' });
+  await expect(robot).toContainText('Progetto personale');
+  for (const component of ['Motore stepper', 'Due servomotori', 'Struttura meccanica artigianale', 'Componenti elettronici e cablaggio']) await expect(robot).toContainText(component);
+  await expect(robot).not.toContainText(/Arduino|ESP32|Raspberry|Python|C\+\+/);
+  await expect(page.locator('.projects-empty')).toContainText('Altri progetti');
   await expect(page.locator('a[href^="mailto:"], a[href^="tel:"], .social-links')).toHaveCount(0);
   expect(data.contact.email).toBe(''); expect(data.contact.socials).toEqual([]);
 });

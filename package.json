@@ -13,7 +13,9 @@
     "github:status": "node scripts/github.mjs status",
     "build:scene": "node scripts/build-scene.mjs",
     "screenshots": "node scripts/capture.mjs",
-    "audit": "node scripts/audit.mjs"
+    "audit": "node scripts/audit.mjs",
+    "test:robot": "node --test tests/robot-model.test.mjs",
+    "screenshots:robot": "node scripts/robot-previews.mjs"
   },
   "engines": {
     "node": ">=22"
