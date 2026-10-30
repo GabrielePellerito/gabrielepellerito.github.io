@@ -1,173 +1,193 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Versione ufficiale Dark Editorial 3D, pubblicata da GitHub Pages tramite `main` su **https://gabrielepellerito.com/**. Include i contenuti professionali ricavati dal CV del 14 aprile 2025. I percorsi formativi da confermare sono segnalati; il documento originale rimane privato. I branch Dark e Light, il backup, CNAME e configurazione di Pages sono preservati.
+Braccio robotico artigianale · confronto locale con Main · aggiornamento del 28 ottobre 2026.
 
-## Direzione visiva
+Nero profondo, nome monumentale e cognome a contorno. Robot in grafite e antracite, metallo satinato, dettagli argentati e luce di bordo più marcata.
 
-Nero profondo, bianco, grigi metallici. Nome monumentale e cognome a contorno, composizione asimmetrica, scultura cromata a nodo toroidale con orbita sottile, sezioni editoriali, timeline e card con profondità. Nessuna professione o esperienza è attribuita a Gabriele senza dati reali; i contenuti mancanti sono segnaposto espliciti.
+## Tre anteprime indipendenti
 
-## Avvio locale
+Il sito ufficiale https://gabrielepellerito.com/ viene servito da `main` con il design Dark e il braccio robotico. I due branch di design restano disponibili per lo sviluppo e il confronto locale. CNAME e configurazione del dominio sono preservati.
 
-Da questa cartella, con Node.js 22 o successivo:
+| Versione | Worktree locale | Branch | URL |
+| --- | --- | --- | --- |
+| Main di confronto | `sito-pronto` | `main` | http://127.0.0.1:4173 |
+| Dark | `concepts/dark-editorial-3d` | `design/dark-editorial-3d` | http://127.0.0.1:4174 |
+| Light | `concepts/light-minimal-3d` | `design/light-minimal-3d` | http://127.0.0.1:4175 |
+
+Le tre cartelle appartengono allo stesso repository Git tramite worktree. Non cambiare branch sotto un server attivo: confronta le versioni aprendo i tre URL in schede differenti. Nessuna dipendenza deve essere installata per navigare: i file statici sono già compilati.
+
+Dal checkout di uno dei due design, in PowerShell:
 
 ```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preview-worktrees.ps1 -Action Start
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preview-worktrees.ps1 -Action Status
+```
+
+Il parametro ExecutionPolicy riguarda soltanto il processo che esegue questo script locale; non cambia la policy del computer. Lo script avvia tre processi Node nascosti, verifica branch e HTML restituito, riutilizza i server riconosciuti e rifiuta di arrestare processi sconosciuti. Le anteprime restano attive. Log in `artifacts/robot-previews/` nella cartella esterna del workspace.
+
+Per interrompere i tre server:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preview-worktrees.ps1 -Action Stop
+```
+
+Per riavviarli esegui Stop, poi Start. In una struttura diversa passa `-Workspace 'C:/percorso/sito-gabriele'`; le tre cartelle devono avere i nomi della tabella. Non vengono creati worktree aggiuntivi o modificati branch.
+
+In alternativa, usa tre terminali PowerShell distinti dalla cartella esterna `sito-gabriele`:
+
+```powershell
+# Terminale 1
+cd sito-pronto
+$env:PORT = '4173'
+node scripts/serve.mjs
+
+# Terminale 2
+cd concepts/dark-editorial-3d
+$env:PORT = '4174'
+node scripts/serve.mjs
+
+# Terminale 3
+cd concepts/light-minimal-3d
+$env:PORT = '4175'
 node scripts/serve.mjs
 ```
 
-Apri **http://127.0.0.1:4174**. Non occorre installare dipendenze per l’anteprima: HTML, immagini e bundle WebGL sono già inclusi. Ferma il server con `Ctrl+C`. Per una porta diversa: `$env:PORT = '4180'` prima del comando.
+In ciascun terminale, Ctrl+C interrompe soltanto quel server. Se una porta è già occupata dal launcher, arresta prima i suoi processi. Il server ascolta esclusivamente su 127.0.0.1.
 
-I due checkout locali sono `concepts/dark-editorial-3d` e `concepts/light-minimal-3d`, ciascuno sul proprio branch. Il checkout precedente `sito-pronto` rimane sul suo `main` locale.
+## Ricostruzione del prototipo
 
-Per lavorare da un clone nuovo:
+Le fonti geometriche primarie sono le fotografie locali `IMG_0259.JPG` e `IMG_0261.JPG`. L'infografica è usata soltanto per presentazione e materiali: le sue quote non sono misure del prototipo. Il modello mantiene la scatola rettangolare, il basamento a strati, la tavola lunga inclinata, due servo, il supporto terminale e la pala curva sporgente. Non contiene una pinza, attuatori idraulici o un robot industriale aggiunto.
 
-```powershell
-git clone https://github.com/GabrielePellerito/gabrielepellerito.github.io.git portfolio-concepts
-cd portfolio-concepts
-git switch design/dark-editorial-3d
-node scripts/serve.mjs
-```
+`src/robot.js` è identico nei due branch. Costruisce vera geometria Three.js: tavole smussate, strati, corpi dei motori, alberi, squadrette estruse, viti, una pala a guscio chiuso e cavi tubolari. Nessuna fotografia viene usata come texture o Hero.
 
-Per cambiare concept in un clone ordinario, arresta il server, salva le modifiche, poi `git switch design/light-minimal-3d` e riavvia. Con i worktree già presenti Git impedisce di aprire lo stesso branch in due directory: usa direttamente il checkout corrispondente.
-
-## Contenuti e progetti
-
-**`content/site.json` è l’unica fonte dei contenuti.** Modifica biografia, percorso, competenze, interessi, progetti, email e social, poi:
-
-```powershell
-node scripts/update.mjs
-node scripts/check.mjs
-```
-
-Imposta `placeholder: false` solo dopo aver inserito dati reali. Rimuovi `[Da completare]` dal testo e aggiorna le introduzioni che parlano dei segnaposto. Un’email vuota nasconde il pulsante; `contact.email` valorizzato genera un vero `mailto:`. Non viene simulato alcun invio.
-
-Le schede progetto supportano i campi esistenti `title`, `description`, `category`, `tags`, `url`, `placeholder` e, facoltativamente:
-
-```json
-{
-  "stack": ["Tecnologia realmente usata"],
-  "githubUrl": "https://github.com/ACCOUNT/REPOSITORY",
-  "demoUrl": "https://DEMO-PUBBLICA/",
-  "year": "Periodo reale",
-  "image": {
-    "src": "./assets/anteprima.webp",
-    "alt": "Descrizione pertinente dell’anteprima",
-    "width": 1200,
-    "height": 800
-  }
-}
-```
-
-Questo è uno schema di esempio, non un progetto personale. Senza `stack` si usano i `tags`; senza immagine appare una geometria decorativa indicata come composizione astratta. I link sono mostrati solo per schede non segnaposto. Immagini locali con dimensioni obbligatorie evitano richieste a terzi e riducono CLS; i collegamenti esterni devono essere HTTPS.
-
-## 3D e movimento
-
-**Three.js 0.186.1**, con licenza MIT inclusa, serve per geometria e materiali realmente tridimensionali. `src/scene.js` costruisce un `TorusKnotGeometry` metallico e un’orbita `TorusGeometry`, camera prospettica e luci neutre. `RoomEnvironment` e `PMREMGenerator` producono i riflessi in memoria, senza HDR, modelli o texture scaricati da servizi esterni. Materiale PBR `MeshStandardMaterial`, metalness 1, roughness 0.1.
-
-`assets/main.js` normalizza lo scroll della hero in `[0, 1]` e interpola la posizione con `requestAnimationFrame`. Cambiano rotazioni X/Y/Z, posizione, scala e camera. Non c’è auto-rotazione: a posizione stabilizzata il ciclo si ferma. WebGL è caricato **al primo scroll**, per non ritardare il contenuto iniziale; il prerender WebP della stessa scultura è visibile da subito. `?render3d=1` forza l’inizializzazione per screenshot e revisione, senza alterare il comportamento normale.
-
-La qualità riduce segmenti, antialiasing e DPR sui dispositivi piccoli o con pochi core; il DPR è limitato a 1.65 su desktop e 1.25 in modalità ridotta. ResizeObserver aggiorna il canvas. IntersectionObserver sospende l’animazione fuori dalla hero; la visibilità della pagina interrompe il RAF. La perdita del contesto ripristina l’immagine. `pagehide` rilascia geometrie, materiali, environment map, renderer e observer; il ritorno dalla bfcache reinizializza la scena.
-
-I reveal hanno una leggera prospettiva; le card usano CSS 3D e pointer events solo su puntatore preciso. Non è necessario usare il mouse. Lo scroll resta nativo.
-
-Per disattivare le animazioni: pulsante pausa nella navbar, preferenza di sistema **Riduci movimento**, oppure `design.motion: false` nel JSON e rigenerazione. La preferenza di sistema prevale. Con movimento ridotto, JavaScript disabilitato, risparmio dati o WebGL non disponibile, la scultura statica rimane visibile; i contenuti restano leggibili.
-
-## Struttura e strumenti
+Gerarchia dei tre gradi di libertà:
 
 ```text
-content/site.json           Testi, SEO e impostazione movimento
-scripts/template.mjs       Composizione HTML specifica Dark
-scripts/html.mjs           Componenti semantici e metadati
-scripts/update.mjs         Genera HTML, 404, sitemap, robots e favicon
-assets/style.css           Design Dark, responsive, focus e stampa
-assets/main.js             Navigazione, scroll, pausa, reveal e card
-assets/theme.js            Preferenza movimento prima del CSS
-src/scene.js               Sorgente Three.js del concept
-scripts/build-scene.mjs    Bundle statico esbuild e hash di sincronizzazione
-assets/scene.bundle.js     Bundle locale, caricato al primo scroll
-assets/sculpture.webp      Fallback ottimizzato da 47 KB circa
-assets/sculpture.png       Prerender sorgente della scultura
-scripts/create-assets.mjs  Rigenera fallback, social card e icone
-tests/site.spec.mjs        Test funzionali, 3D e WCAG automatico
-scripts/capture.mjs        Screenshot desktop e mobile
-scripts/audit.mjs          Lighthouse desktop e mobile
+RobotRoot
+├── StationaryBase / StepperMotor
+└── BaseRotationPivot                  asse Y
+    └── RotatingStructure / ArmServomotor
+        └── ArmServoPivot              asse Z locale
+            └── ArmAssembly / ShovelServomotor
+                └── ShovelServoPivot  asse Z locale
+                    └── ShovelAssembly
 ```
 
-Nessun framework o backend. **esbuild** compila soltanto il bundle durante lo sviluppo; GitHub Pages serve i file già generati. Playwright, axe e Lighthouse sono strumenti di QA e non vengono inviati al visitatore. Nessun CDN, analytics, cookie o API key. La CSP mantiene `script-src 'self'` e l’hash JSON-LD, senza `unsafe-inline` o `unsafe-eval`. Gli stili aggiornati da JavaScript usano proprietà CSSOM, non stringhe HTML da dati personali.
+La scatola resta ferma. Il primo pivot ruota tutta la struttura sovrastante; il secondo inclina la tavola e il gruppo terminale; il terzo muove soltanto pala e staffe collegate all'uscita. Il modello non è animato ruotando RobotRoot.
 
-## Comandi di sviluppo e screenshot
+**Approssimazioni dichiarate:** proporzioni normalizzate senza unità fisiche; spessori, numero esatto degli strati e dei fissaggi; collegamenti posteriori, distanziali e geometria degli alberi; alloggiamento dello stepper dentro la scatola, non osservabile direttamente nelle foto; percorso semplificato dei cavi e gioco dei collegamenti; curvatura della pala. Incollaggi e irregolarità manuali sono semplificati, mantenendo l'assemblaggio a tavole. Non sono stati dedotti microcontrollori, driver, firmware, carichi o prestazioni reali.
 
-Su Windows usa `npm.cmd` se PowerShell blocca `npm.ps1`, senza cambiare le policy del computer.
+Sequenza di presentazione, con transizioni smoothstep e interpolazione dello scroll esistente:
+
+| Progresso | Movimento principale |
+| --- | --- |
+| 0% | Base neutra, tavola inclinata, pala quasi orizzontale |
+| 0–25% | Rotazione della base |
+| 25–55% | Inclinazione del braccio |
+| 50–78% | Movimento indipendente della pala |
+| 82–100% | Piccolo assestamento dei tre giunti nella posa finale |
+
+Intervalli **solo visivi**, non limiti misurati: base 0°…48°, braccio −14°…1°, pala −16°…14°. Movimento deterministico e reversibile; nessun controllo del robot fisico.
+
+## Rendering e prestazioni
+
+`src/scene.js` conserva `createScene(mount, options)`, `setProgress(progress)` e `dispose()`. Il getter di sola lettura `diagnostics` serve ai test; non installa comandi, slider o globali nella pagina pubblica.
+
+Three.js 0.186.1, esbuild e licenza MIT già presenti. Camera prospettica, materiali PBR, environment PMREM generata in memoria, luci neutre e ombre PCF. Nessun modello GLB, HDR, texture pesante, CDN o libreria aggiuntiva. Le due palette usano la stessa cinematica e le stesse geometrie.
+
+`assets/main.js` è preservato: progressione normalizzata, requestAnimationFrame interpolato, IntersectionObserver, scroll nativo, menu accessibile e pausa persistente. Il bundle è caricato al primo scroll; il fallback WebP, generato dallo stesso modello, appare subito. `?render3d=1` forza il caricamento per revisione. Senza JavaScript, WebGL, con risparmio dati o movimento ridotto rimane l'immagine statica.
+
+DPR massimo 1.65 desktop e 1.25 mobile; meno segmenti e ombre a risoluzione ridotta sui dispositivi piccoli. Circa 35.8 mila triangoli desktop e 14.1 mila mobile. Nessun render a riposo o fuori dalla Hero; resize e visibilità sono gestiti. In caso di perdita reale del contesto appare il fallback; al ripristino viene rigenerata anche la environment PMREM. `dispose()` rilascia risorse, observer e renderer e termina il contesto WebGL.
+
+Per disabilitare il movimento: pulsante nella navbar, preferenza di sistema **Riduci movimento**, oppure `design.motion: false` nel JSON seguito da rigenerazione. La preferenza di sistema prevale.
+
+Riferimenti tecnici: [gerarchia Object3D](https://threejs.org/docs/pages/Object3D.html) e [rilascio delle risorse Three.js](https://threejs.org/manual/pages/how-to-dispose-of-objects.html).
+
+## Contenuti, SEO e privacy
+
+Modifica **`content/site.json`**, poi `node scripts/update.mjs`. Non modificare soltanto l'HTML generato. I dati dei due branch, escluso `design`, sono uguali.
+
+Il portfolio distingue il contributo professionale al sito coworking da **Braccio robotico articolato**, progetto personale confermato dal proprietario. Per il robot sono elencati soltanto stepper, due servo, struttura artigianale, elettronica e cablaggio. La scheda usa il prerender del modello, identificato come ricostruzione; nessuna demo, repository, data o stack non documentati.
+
+Il profilo professionale deriva dal CV del 14 aprile 2025. Sono preservati quattro incarichi/tirocini, qualifica di Operatore informatico, mobilità internazionale e sette categorie di competenze. I percorsi Galdus di Tecnico informatico e robotica ABB riportano **Stato da aggiornare**: non sono dichiarati ancora attivi nel 2026 o conclusi. Lingue dichiarate: italiano madrelingua, inglese C1, spagnolo B1, francese A2. Nessuna certificazione aggiunta.
+
+Email e social rimangono vuoti, senza telefono, indirizzo privato o data di nascita. Un futuro indirizzo autorizzato in `contact.email` genera un vero mailto; nessun form simulato.
+
+Il CV, le fotografie e l'infografica sono esclusi tramite `.gitignore` e non sono copiati nei file pubblicabili. Entrambi i worktree consultano le fonti in posizione locale, senza necessità di duplicarle. Le copie preesistenti in Main sono protette anche dall'esclusione Git locale condivisa, senza modificare alcun file di Main. Il server dei concept rifiuta richieste alle fonti, comprese varianti maiuscole e URL codificati. I controlli impediscono che siano tracciate.
+
+Canonico invariato: https://gabrielepellerito.com/. HTML semantico, ProfilePage/Person, Open Graph, Twitter card e testi alternativi pertinenti; sitemap e robots restano sincronizzati. Nessun tracker, cookie, backend o credenziale. CSP senza unsafe-inline/unsafe-eval.
+
+## File principali
+
+| File | Funzione |
+| --- | --- |
+| `content/site.json` | Contenuti pubblici e impostazioni |
+| `src/robot.js` | Geometria, materiali, pivot e sequenza articolata |
+| `src/scene.js` | Camera, illuminazione, rendering e ciclo di vita |
+| `assets/main.js` | Navigazione e movimento esistenti |
+| `assets/style.css` | Stile del concept e anteprima progetto senza ritagli |
+| `scripts/template.mjs`, `scripts/html.mjs` | Layout e componenti semantici |
+| `scripts/build-scene.mjs` | Bundle e hash di scene.js, robot.js e bundle |
+| `scripts/create-assets.mjs` | Fallback PNG/WebP, social card e icone |
+| `scripts/privacy.mjs` | Protezione delle fonti private |
+| `scripts/preview-worktrees.ps1` | Start, Status e Stop delle tre anteprime |
+| `scripts/robot-previews.mjs` | Screenshot delle tre pose e confronto Main |
+| `scripts/robot-harness.mjs` | Controllo della posa nel solo browser di test |
+| `scripts/robot-profile.mjs` | Campione locale di frame e rilascio risorse |
+| `tests/robot-model.test.mjs`, `tests/robot.spec.mjs` | Cinematica e WebGL reale |
+
+## Build, test e screenshot
+
+Node.js 22 o successivo. Usa `npm.cmd` se PowerShell blocca npm.ps1; non occorre cambiare policy.
 
 ```powershell
 npm.cmd ci
 npm.cmd run build:scene
 npm.cmd run update
-npm.cmd run check
-npm.cmd test
-```
-
-Per rigenerare asset e fare screenshot, lascia il server avviato in un altro terminale:
-
-```powershell
+# Con il rispettivo server locale gia avviato:
 npm.cmd run assets
-npm.cmd run screenshots
+npm.cmd run check
+npm.cmd run test:robot
+npm.cmd test -- --workers=2
+node scripts/check-cv.mjs --compare ../OTHER-DESIGN
+node scripts/robot-profile.mjs
 npm.cmd run audit
 ```
 
-Le immagini e i report di revisione sono in `artifacts/`, ignorata da Git: `desktop.png`, `mobile.png`, versioni a pagina intera, report Lighthouse HTML/JSON. Edge installato è il browser di default; con Chrome imposta `$env:BROWSER_CHANNEL = 'chrome'`. Lighthouse usa `CHROME_PATH` quando fornito. Il comando `assets` richiede WebGL per catturare la scultura effettiva; non genera una sostituzione generica.
+Sostituisci OTHER-DESIGN con `light-minimal-3d` da Dark, o `dark-editorial-3d` da Light. Il riesame CV legge soltanto la fonte privata locale; se si trova altrove, imposta CV_SOURCE. Non serve per il normale build di un clone pubblico.
 
-## Contenuti professionali e privacy
-
-I contenuti sono un adattamento editoriale del CV del **14 aprile 2025**, con gli stessi fatti nei due branch di design. Sono documentati quattro incarichi/tirocini (Info Servi Canarias S.L., Gruppo Digi, Alfapi, San Marino Mail), la qualifica di Operatore informatico, i due percorsi Galdus da verificare e l’esperienza di studio al Wagner College. Il progetto coworking è presentato come **contributo professionale**, senza stack, repository o demo inventati.
-
-I percorsi di Tecnico informatico e robotica ABB, indicati come attivi nella fonte del 2025, mostrano **Stato da aggiornare**. Non si dichiara che proseguano nel 2026 o che siano stati completati. Il patentino ABB non è presentato come conseguito. I livelli linguistici dichiarati sono italiano madrelingua, inglese C1, spagnolo B1 e francese A2, senza attribuire certificazioni.
-
-Da verificare con il proprietario prima di ulteriori aggiornamenti:
-
-- stato e possibili date di conclusione dei due percorsi Galdus;
-- stack e possibilità di citare un collegamento pubblico al sito coworking;
-- eventuali esperienze e progetti successivi al 14 aprile 2025;
-- email e profili social che si desidera autorizzare per la pubblicazione.
-
-Email e social rimangono vuoti. Non sono stati aggiunti telefono, indirizzo privato o data di nascita. Il JSON-LD pubblica soltanto il profilo tecnico e la qualifica di Operatore informatico confermata, senza ruoli attuali o titoli accademici non attestati.
-
-Il documento `assets/contenuti-cv-sito-gabriele.md` è **privato**: escluso tramite `.gitignore`, non tracciato e non collegato dall’HTML. Non è stato copiato negli asset dei checkout di design. I due worktree leggono la medesima fonte locale fuori dai rispettivi alberi pubblicabili; un’esclusione Git locale protegge anche la copia di lavoro già esistente nel checkout principale. Il server di anteprima nega le richieste al documento, incluse varianti maiuscole e URL codificati. `.gitignore` da solo non sarebbe una protezione HTTP e non rimuoverebbe un file già tracciato: i controlli verificano entrambi gli aspetti.
-
-Per il riesame locale, senza copiare la fonte:
+Per aggiornare il modello: modifica le sorgenti, ricompila il bundle, rigenera asset e controlla la sincronizzazione. `node scripts/create-assets.mjs --social-only` aggiorna soltanto social card e icone quando cambia il testo.
 
 ```powershell
-node scripts/check-cv.mjs --compare ../light-minimal-3d
+# Tre pose desktop e una mobile del branch corrente:
+npm.cmd run screenshots:robot
+
+# Tutte le versioni, con i tre server attivi:
+$env:PREVIEW_ARTIFACTS = (Join-Path (Resolve-Path ../..) 'artifacts/robot-previews')
+node scripts/robot-previews.mjs --all
+Remove-Item Env:PREVIEW_ARTIFACTS
 ```
 
-Dal checkout Light usa invece `--compare ../dark-editorial-3d`. In una struttura diversa puoi impostare `CV_SOURCE` sul percorso locale del documento. Questo comando non è necessario per generare il sito: la fonte privata non è richiesta ai visitatori o in un clone pubblico. `scripts/check.mjs` impedisce invece che il documento venga incluso tra i file tracciati.
+File: `hero-main.png`, `hero-dark-0.png`, `hero-dark-50.png`, `hero-dark-100.png`, `hero-light-0.png`, `hero-light-50.png`, `hero-light-100.png`, più `hero-dark-mobile.png` e `hero-light-mobile.png`. `verification.json` registra WebGL attivo, pose, identità ed errori.
 
-Le due timeline distinguono esperienza e formazione. Le sette categorie di competenze usano elenchi e livelli dichiarati, senza barre percentuali arbitrarie. Le rappresentazioni geometriche dei progetti sono indicate come astratte, senza fingere un’anteprima reale. Le scene Three.js, i relativi bundle e i prerender delle sculture sono rimasti invariati.
+L'harness modifica soltanto la risposta JavaScript nel contesto Playwright per controllare la scena già avviata, lasciando la vera interfaccia. Imposta 0, 0.5 e 1 mantenendo la Hero inquadrata; verifica canvas, contesto e scomparsa del fallback prima dello screenshot. Nessun comando di debug è pubblicato nell'interfaccia.
 
-Per rigenerare soltanto l’immagine social con i nuovi testi, mantenendo i prerender 3D:
+Edge/Chromium installato è il browser predefinito; `BROWSER_CHANNEL=chrome` seleziona Chrome. `artifacts/` è esclusa da Git. Report Lighthouse HTML/JSON e campione `robot-performance.json` sono locali.
 
-```powershell
-node scripts/create-assets.mjs --social-only
-```
+## Verifiche
 
+Per ogni design: **34 test Playwright e 3 test Node**. Coprono contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale, tre giunti, reversibilità, geometria equivalente fra palette, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer.
 
-## Verifiche registrate
+Axe applica i controlli WCAG 2.2 AA alla pagina e al menu mobile; non sostituisce una certificazione manuale. I controlli geometrici verificano gerarchia e distanze dalla base lungo 201 pose: non sono una simulazione della dinamica, dei carichi o una verifica CAD completa delle collisioni.
 
-28 test Playwright superati su Edge/Chromium desktop e smartphone: risorse/console, rotazione reale sullo scroll, stabilizzazione, pausa e persistenza, movimento ridotto senza download WebGL, menu/focus, sezione attiva, 320/375/768/1440/1920 px, assenza di JS/WebGL, perdita del contesto, 404 e SEO. Axe non rileva violazioni nei controlli WCAG 2.2 AA applicati, inclusa la navigazione mobile aperta. Non è una certificazione manuale di conformità.
+Lighthouse misura il caricamento iniziale; `robot-profile.mjs` controlla separatamente il percorso WebGL dopo l'interazione. Emulazione mobile sul computer, non prova su smartphone fisico o misura INP sul campo.
 
-Lighthouse locale: **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, sia desktop sia mobile. LCP circa 1.7 s desktop e 1.5 s mobile, CLS 0; TBT 0 ms su entrambi. È una singola misurazione di laboratorio del caricamento iniziale in questo ambiente, non una garanzia di Core Web Vitals reali né una misura INP sul campo. Il test separato di scroll verifica il percorso WebGL dopo l’interazione.
+Misurazione locale finale del 28 ottobre 2026: Lighthouse **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, su desktop e mobile. LCP desktop/mobile: 1.5 s / 1.4 s; CLS 0 su entrambi; TBT desktop/mobile: 0 ms / 0 ms. Il campione WebGL non produce frame a riposo; dopo dispose il canvas è rimosso, le geometrie rilasciate e il contesto terminato. Sono risultati di laboratorio, non garanzie su dispositivi reali.
 
-## Pubblicazione degli aggiornamenti
+## Git e pubblicazione futura
 
-GitHub Pages serve `main`, cartella `/(root)`, sul dominio **https://gabrielepellerito.com/**. I push sui branch di design non modificano il sito ufficiale. Non occorrono nuovi workflow o servizi di hosting.
+Gli aggiornamenti del sito ufficiale si pubblicano con un normale commit e push su `main`. I branch `design/dark-editorial-3d` e `design/light-minimal-3d` conservano i concept indipendenti. Il backup originale viene preservato.
 
-Dal checkout `sito-pronto`, dopo aver modificato i contenuti pubblici:
+Per confrontare il codice usa i worktree esistenti, oppure `git diff main...design/dark-editorial-3d`. In un clone senza worktree usa `git switch` soltanto dopo aver salvato le modifiche e fermato il relativo server.
 
-```powershell
-node scripts/update.mjs
-node scripts/check.mjs
-git add content/site.json index.html 404.html robots.txt sitemap.xml assets/favicon.svg
-git commit -m "Aggiorna sito personale"
-git push origin main
-```
-
-Se modifichi altri asset o componenti, aggiungili esplicitamente dopo averli revisionati. Non includere il documento privato del CV. Mantieni il CNAME e il backup e verifica il sito pubblico dopo la distribuzione.
+La versione Dark con robot viene integrata in `main` su richiesta esplicita del proprietario. Per selezionare in futuro un altro design, revisiona una pull request verso `main` e verifica il sito dopo il deploy. Non occorre cambiare dominio o hosting.

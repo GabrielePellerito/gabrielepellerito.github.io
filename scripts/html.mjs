@@ -53,7 +53,7 @@ export function navigation(d) {
 }
 
 export function sculpture(d) {
-  return `<div class="sculpture-stage" data-scene="${e(d.design.concept)}" aria-hidden="true"><img class="sculpture-fallback" src="./assets/sculpture.webp" alt="" width="1000" height="1000" fetchpriority="high" decoding="async"><div class="scene-mount"></div></div>`;
+  return `<div class="sculpture-stage" data-scene="${e(d.design.concept)}" role="img" aria-label="${e(d.hero.artDescription)}"><img class="sculpture-fallback" src="./assets/sculpture.webp" alt="" width="1000" height="1000" fetchpriority="high" decoding="async"><div class="scene-mount" aria-hidden="true"></div></div>`;
 }
 
 export function project(d, item, index) {

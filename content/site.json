@@ -25,7 +25,7 @@
     "language": "it",
     "locale": "it_IT",
     "indexing": true,
-    "imageAlt": "Gabriele Pellerito — informatica, programmazione e IoT. Composizione scultorea monocromatica."
+    "imageAlt": "Gabriele Pellerito: ricostruzione 3D monocromatica del braccio robotico artigianale con base rotante e pala terminale."
   },
   "navigation": [
     {
@@ -71,10 +71,11 @@
     "primaryTarget": "percorso",
     "secondaryLabel": "Esplora le esperienze",
     "secondaryTarget": "percorso-esperienze",
-    "artLabel": "Informatica, programmazione e IoT.",
-    "artCaption": "Sviluppo web, reti ed elettronica.",
+    "artLabel": "Braccio robotico articolato",
+    "artCaption": "Tre attuatori. Un progetto artigianale.",
     "bottomLabel": "Curiosità, precisione e voglia di imparare.",
-    "scrollLabel": "Scorri per conoscermi"
+    "scrollLabel": "Scorri per conoscermi",
+    "artDescription": "Modello 3D del mio braccio robotico artigianale: base rotante, tavola inclinata e pala terminale, azionati da uno stepper e due servomotori."
   },
   "about": {
     "number": "01",
@@ -328,8 +329,8 @@
   "projects": {
     "number": "04",
     "label": "Progetti",
-    "title": "Un contributo concreto allo sviluppo web.",
-    "intro": "Un’attività documentata del mio percorso professionale. Il contributo è distinto dai progetti personali e non viene presentato come un lavoro svolto interamente da solo.",
+    "title": "Dal web alla prototipazione.",
+    "intro": "Un contributo professionale allo sviluppo web e un progetto personale di robotica: due modi di trasformare idee e problemi in soluzioni concrete.",
     "items": [
       {
         "title": "Sistema web di prenotazione per coworking",
@@ -352,9 +353,35 @@
         "placeholder": false,
         "visualLabel": "Composizione astratta · non è un’anteprima del sito",
         "availabilityNote": "Nessun repository o collegamento pubblico è documentato. Lo stack del progetto è da confermare."
+      },
+      {
+        "id": "braccio-robotico",
+        "title": "Braccio robotico articolato",
+        "category": "Robotica · Elettronica · Prototipazione",
+        "organization": "Progetto personale",
+        "description": "Progettazione e realizzazione di un braccio robotico artigianale con basamento rotante azionato da un motore stepper e due servomotori per il controllo del braccio e della pala terminale.",
+        "tags": [
+          "Motore stepper",
+          "Due servomotori",
+          "Struttura meccanica artigianale",
+          "Componenti elettronici e cablaggio"
+        ],
+        "stack": [],
+        "url": "",
+        "githubUrl": "",
+        "demoUrl": "",
+        "image": {
+          "src": "./assets/sculpture.webp",
+          "alt": "Ricostruzione 3D del prototipo: basamento rettangolare, supporto inclinato a strati e pala terminale curva.",
+          "width": 1000,
+          "height": 1000
+        },
+        "placeholder": false,
+        "visualLabel": "Ricostruzione 3D del prototipo",
+        "availabilityNote": "Materiali reinterpretati in monocromia. Proporzioni e movimenti del modello digitale sono indicativi."
       }
     ],
-    "moreTitle": "Progetti personali",
+    "moreTitle": "Altri progetti",
     "moreText": "Altri progetti in aggiornamento. Saranno aggiunti soltanto lavori documentati e condivisibili."
   },
   "contact": {

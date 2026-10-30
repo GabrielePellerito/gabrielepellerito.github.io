@@ -16,7 +16,11 @@ for (const item of data.journey.items) {
 }
 assert.equal(data.journey.items.filter((item) => item.status).length, 2);
 assert.equal(data.contact.email, ''); assert.deepEqual(data.contact.socials, []);
-assert.equal(data.projects.items.length, 1);
+assert.equal(data.projects.items.length, 2);
+// The personal robot is confirmed by the owner's brief/photos, not by the 2025 CV.
+assert.equal(data.projects.items[1].id, 'braccio-robotico');
+assert.deepEqual(data.projects.items[1].stack, []);
+for (const key of ['url', 'githubUrl', 'demoUrl']) assert.equal(data.projects.items[1][key], '');
 assert.deepEqual(data.projects.items[0].stack, []);
 for (const key of ['url', 'githubUrl', 'demoUrl']) assert.equal(data.projects.items[0][key], '');
 const languageGroup = data.skills.groups.find((group) => group.title === 'Lingue');
