@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Box3, Vector3, Matrix3 } from 'three';
+import { measureShovel, boundsInFrame } from './shovel-mechanics.mjs';
 import { createRobot, poseForProgress } from '../src/robot.js';
 
 test('three actuators, correct ancestor chain and fixed foundation', () => {
@@ -9,7 +10,7 @@ test('three actuators, correct ancestor chain and fixed foundation', () => {
     let node = robot.root.getObjectByName('ShovelAssembly');
     const chain = [];
     while (node) { chain.unshift(node.name); node = node.parent; }
-    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'ShovelServoPivot', 'ShovelAssembly']);
+    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'ShovelServoPivot', 'MountingPlate', 'ShovelAssembly']);
     for (const name of ['StepperMotor', 'ArmServomotor', 'ShovelServomotor']) assert.ok(robot.root.getObjectByName(name));
     const initial = robot.state;
     robot.joints.basePivot.rotation.y += .3; robot.root.updateMatrixWorld(true);
@@ -64,54 +65,67 @@ test('local palette option preserves mechanics; mobile geometry is lighter', () 
   } finally { dark.dispose(); light.dispose(); mobile.dispose(); }
 });
 
-// Photo-derived relationships, in the terminal joint's frame: long axis -X,
-// convex face +Z (away from the arm), opening -Z, reinforced lower rim below
-// the mounting rim. Do not assert just a chosen Euler angle or a local normal.
-test('photographic shovel profile and mounting survive every pose and mobile simplification', () => {
+// Definitive reference: an upward-open tray, with its entire rear flange flush
+// against the moving mounting plate. A and B are measured in world coordinates.
+test('tray axes are orthogonal and its rear face stays flush to the moving plate', () => {
   for (const lowPower of [false, true]) {
     const robot = createRobot({ lowPower });
     try {
       const assembly = robot.root.getObjectByName('ShovelAssembly');
-      const blade = robot.root.getObjectByName('ShovelBlade');
-      const shell = robot.root.getObjectByName('CurvedShovel');
-      const attr = shell.geometry.attributes.position;
-      const outerCount = attr.count / 2;
-      // Select a section halfway along the shell, away from end seam normals.
-      shell.geometry.computeBoundingBox();
-      const midpoint = shell.geometry.boundingBox.getCenter(new Vector3()).x;
-      let sectionX = attr.getX(0);
-      for (let i = 0; i < outerCount; i++) if (Math.abs(attr.getX(i) - midpoint) < Math.abs(sectionX - midpoint)) sectionX = attr.getX(i);
-      for (const progress of [0, .25, .5, .75, 1]) {
-        robot.setProgress(progress);
-        const section = [];
-        for (let i = 0; i < outerCount; i++) if (attr.getX(i) === sectionX) {
-          section.push({ i, point: assembly.worldToLocal(shell.localToWorld(new Vector3().fromBufferAttribute(attr, i))) });
-        }
-        section.sort((a, b) => b.point.y - a.point.y);
-        const upper = section[0].point, lower = section.at(-1).point;
-        const crest = section.reduce((a, b) => a.point.z > b.point.z ? a : b);
-        const chord = upper.clone().add(lower).multiplyScalar(.5);
-        assert.ok(upper.y < 0 && lower.y < upper.y, 'The entire cross section hangs below its servo');
-        assert.ok(Math.abs(upper.z - lower.z) < 1e-6, 'Opening rims share a rear plane');
-        assert.ok(crest.point.z > chord.z, 'Convex back points away from the arm, opening toward it');
-        assert.ok(crest.point.y < upper.y && crest.point.y > lower.y, 'Convex crest is between the upper and lower edges');
-        assert.ok(section.every(({ point }) => point.x < 0), 'Shovel projects to the photographed side of the mount');
-        const normal = new Vector3().fromBufferAttribute(shell.geometry.attributes.normal, crest.i)
-          .applyNormalMatrix(new Matrix3().getNormalMatrix(shell.matrixWorld));
-        const servoFront = new Vector3(0, 0, 1).transformDirection(robot.joints.armPivot.matrixWorld);
-        assert.ok(normal.dot(servoFront) > .99, 'Outward face normal follows the servo front, including parent rotations');
-        const lowerRail = assembly.worldToLocal(robot.root.getObjectByName('ShovelLowerRail').getWorldPosition(new Vector3()));
-        const upperRail = assembly.worldToLocal(robot.root.getObjectByName('ShovelRearRail').getWorldPosition(new Vector3()));
-        assert.ok(lowerRail.y < upperRail.y && upperRail.y < 0, 'The reinforced edge is below the attachment');
-        assert.ok(blade.matrix.determinant() > 0, 'The blade must never be mirrored');
+      const mount = robot.root.getObjectByName('MountingPlate');
+      assert.equal(assembly.parent, mount);
+      const relative = assembly.matrix.clone();
+      for (let step = 0; step <= 200; step++) {
+        robot.setProgress(step / 200);
+        const m = measureShovel(robot);
+        assert.ok(Math.abs(m.dot) < 1e-7, 'A (rear to free edge) must be perpendicular to the physical shaft B');
+        assert.ok(m.contactGap < 1e-7 && m.contactContained, 'Full rear contact face lies on the mounting surface');
+        for (let i = 0; i < m.contactCorners.length; i++) assert.ok(m.contactCorners[i].distanceTo(m.platePoints[i]) < 1e-7);
+        assert.deepEqual(assembly.matrix, relative, 'No separate translation or rotation of the tray');
+        const localA = m.A.clone().transformDirection(mount.matrixWorld.clone().invert());
+        assert.ok(localA.x < -.98, 'Longitudinal direction is toward the left free edge, not across tray width');
+        assert.ok(m.openingNormal.dot(new Vector3(0, 1, 0)) > .9, 'The conservative animation never inverts the opening');
       }
       robot.setProgress(0);
-      const attachment = new Box3().setFromObject(robot.root.getObjectByName('ShovelEndSupport'));
-      const bracket = new Box3().setFromObject(robot.root.getObjectByName('ShovelSideBracket'));
-      assert.ok(attachment.intersectsBox(bracket), 'Blade end support must meet the mounting plate');
-      const horn = new Box3().setFromObject(robot.root.getObjectByName('ShovelServoHorn'));
-      const standoff = new Box3().setFromObject(robot.root.getObjectByName('ShovelHornStandoff'));
-      assert.ok(standoff.intersectsBox(horn) && standoff.intersectsBox(bracket), 'No floating gap between servo horn and bracket');
+      const neutral = measureShovel(robot);
+      assert.ok(neutral.openingNormal.dot(new Vector3(0, 1, 0)) > .999, 'Neutral concavity faces world up');
+      assert.ok(neutral.floorHeight < neutral.rimHeight, 'Interior lies below the rim');
+      const attachmentBefore = neutral.attachment.clone(), freeBefore = neutral.free.clone();
+      const mountBefore = mount.matrixWorld.clone();
+      robot.joints.shovelPivot.rotation.z += .12; robot.root.updateMatrixWorld(true);
+      const tilted = measureShovel(robot);
+      assert.notDeepEqual(mount.matrixWorld, mountBefore, 'The plate moves with the terminal servo');
+      assert.ok(tilted.free.distanceTo(freeBefore) > tilted.attachment.distanceTo(attachmentBefore), 'Free edge sweeps the larger arc');
+      assert.ok(tilted.contactGap < 1e-7, 'Contact is preserved while the servo tilts the tray');
+      const web = new Box3().setFromObject(robot.root.getObjectByName('ServoDrivePlate'));
+      const face = new Box3().setFromObject(robot.root.getObjectByName('MountingPlateSurface'));
+      const spacer = new Box3().setFromObject(robot.root.getObjectByName('ShovelHornStandoff'));
+      assert.ok(web.intersectsBox(face) && web.intersectsBox(spacer), 'The full mounting surface is connected to the output horn');
+    } finally { robot.dispose(); }
+  }
+});
+
+test('open tray has raised side rims, a rounded free end and outward-facing inner surface', () => {
+  for (const lowPower of [false, true]) {
+    const robot = createRobot({ lowPower });
+    try {
+      const shell = robot.root.getObjectByName('CurvedShovel');
+      const frame = robot.root.getObjectByName('MountingPlate');
+      const attr = shell.geometry.attributes.position;
+      const bounds = boundsInFrame(shell, frame);
+      const interior = Array.from({ length: attr.count / 2 }, (_, i) => new Vector3().fromBufferAttribute(attr, i));
+      const xs = [...new Set(interior.map(p => p.x))];
+      const middleX = xs.reduce((a,b) => Math.abs(a-bounds.getCenter(new Vector3()).x) < Math.abs(b-bounds.getCenter(new Vector3()).x) ? a : b);
+      const section = interior.filter(p => p.x === middleX).sort((a,b) => a.z-b.z);
+      const floor = section.reduce((a,b) => a.y<b.y?a:b);
+      assert.ok(floor.y < section[0].y && floor.y < section.at(-1).y, 'Both side edges rise above the concave interior');
+      const tipSection = interior.filter(p => p.x === Math.min(...xs));
+      assert.ok(Math.max(...tipSection.map(p=>p.z))-Math.min(...tipSection.map(p=>p.z)) < section.at(-1).z-section[0].z, 'Free corners are rounded in plan');
+      const normals = shell.geometry.attributes.normal;
+      const normalMatrix = new Matrix3().getNormalMatrix(shell.matrixWorld);
+      let upward = 0;
+      for(let i=0;i<attr.count/2;i++) if(new Vector3().fromBufferAttribute(normals,i).applyNormalMatrix(normalMatrix).y > 0) upward++;
+      assert.ok(upward > attr.count/2 * .95, 'Interior triangles face the open top, not the underside');
     } finally { robot.dispose(); }
   }
 });
