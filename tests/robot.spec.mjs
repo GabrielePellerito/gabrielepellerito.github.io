@@ -48,6 +48,30 @@ test('real WebGL context loss/restoration, then GPU disposal', async ({ page, ba
   expect(await page.evaluate(() => window.__robotQA.diagnostics.geometries)).toBe(0);
 });
 
+test('rapid native scroll reverses the articulated pose without losing WebGL', async ({ page, baseURL, isMobile }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await mountRobot(page, baseURL + '/', { lowPower: isMobile });
+  const initial = await page.evaluate(() => window.__robotQA.diagnostics);
+  const heroHeight = await page.locator('.hero').evaluate((el) => el.offsetHeight);
+  await page.evaluate((height) => scrollTo({ top: height * .65, behavior: 'instant' }), heroHeight);
+  await expect.poll(() => page.evaluate(() => window.__robotQA.progress)).toBeGreaterThan(.3);
+  // Keep the real controller active; no manual setPose interception in this test.
+  await page.evaluate(async (height) => {
+    for (const fraction of [.1, .8, .2, .7, 0]) {
+      scrollTo({ top: height * fraction, behavior: 'instant' });
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+  }, heroHeight);
+  await expect.poll(() => page.evaluate(() => window.__robotQA.progress)).toBe(0);
+  const final = await page.evaluate(() => window.__robotQA.diagnostics);
+  expect(final.tip).toEqual(initial.tip);
+  expect(final.contextLost).toBe(false); expect(final.lost).toBe(false);
+  expect(final.geometries).toBe(initial.geometries);
+  await expect(page.locator('.sculpture-stage')).toHaveAttribute('data-renderer', 'webgl');
+  expect(errors).toEqual([]);
+});
+
 test('private prototype references denied, including uppercase and encoded names', async ({ request }) => {
   for (const file of referenceFiles) {
     for (const name of [file, file.toUpperCase()]) expect((await request.get('/assets/' + encodeURIComponent(name))).status()).toBe(404);

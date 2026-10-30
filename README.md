@@ -1,12 +1,12 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Braccio robotico artigianale · confronto locale con Main · aggiornamento del 28 ottobre 2026.
+Braccio robotico artigianale · correzione del montaggio della pala · 30 ottobre 2026.
 
 Nero profondo, nome monumentale e cognome a contorno. Robot in grafite e antracite, metallo satinato, dettagli argentati e luce di bordo più marcata.
 
 ## Tre anteprime indipendenti
 
-Il sito pubblico continua a essere servito da `main`. Questo branch introduce il robot soltanto nel concept sperimentale; nessun merge, deploy, DNS o CNAME viene modificato.
+Il sito pubblico è servito da `main`, che contiene la versione precedente del robot. La correzione della pala appartiene esclusivamente a `design/dark-editorial-3d`. Da questa revisione Dark è l'unico branch di sviluppo del modello, salvo nuova indicazione esplicita del proprietario. Light, Main e backup restano invariati; nessun merge, deploy, DNS o CNAME viene modificato.
 
 | Versione | Worktree locale | Branch | URL |
 | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ In ciascun terminale, Ctrl+C interrompe soltanto quel server. Se una porta è gi
 
 Le fonti geometriche primarie sono le fotografie locali `IMG_0259.JPG` e `IMG_0261.JPG`. L'infografica è usata soltanto per presentazione e materiali: le sue quote non sono misure del prototipo. Il modello mantiene la scatola rettangolare, il basamento a strati, la tavola lunga inclinata, due servo, il supporto terminale e la pala curva sporgente. Non contiene una pinza, attuatori idraulici o un robot industriale aggiunto.
 
-`src/robot.js` è identico nei due branch. Costruisce vera geometria Three.js: tavole smussate, strati, corpi dei motori, alberi, squadrette estruse, viti, una pala a guscio chiuso e cavi tubolari. Nessuna fotografia viene usata come texture o Hero.
+`src/robot.js` costruisce vera geometria Three.js: tavole smussate, strati, corpi dei motori, alberi, squadrette estruse, viti, una pala a guscio chiuso e cavi tubolari. La correzione terminale è presente solo in questo branch; il codice Light conserva la versione precedente. Nessuna fotografia viene usata come texture o Hero.
 
 Gerarchia dei tre gradi di libertà:
 
@@ -71,6 +71,7 @@ RobotRoot
             └── ArmAssembly / ShovelServomotor
                 └── ShovelServoPivot  asse Z locale
                     └── ShovelAssembly
+                        └── ShovelBlade (montaggio fisso, nessun nuovo giunto)
 ```
 
 La scatola resta ferma. Il primo pivot ruota tutta la struttura sovrastante; il secondo inclina la tavola e il gruppo terminale; il terzo muove soltanto pala e staffe collegate all'uscita. Il modello non è animato ruotando RobotRoot.
@@ -88,6 +89,30 @@ Sequenza di presentazione, con transizioni smoothstep e interpolazione dello scr
 | 82–100% | Piccolo assestamento dei tre giunti nella posa finale |
 
 Intervalli **solo visivi**, non limiti misurati: base 0°…48°, braccio −14°…1°, pala −16°…14°. Movimento deterministico e reversibile; nessun controllo del robot fisico.
+
+### Correzione terminale del 30 ottobre 2026
+
+Nelle due fotografie originali il dorso convesso è davanti al braccio, il bordo rinforzato è in basso e l'apertura concava guarda verso il piano del braccio. Il modello precedente disponeva questa sezione come un arco rivolto verso l'alto. La vista lungo l'asse della pala rende evidente la differenza; una semplice inversione di 180° avrebbe lasciato la sezione sul piano sbagliato.
+
+| Elemento | Relazione nel riferimento locale del servo terminale |
+| --- | --- |
+| Asse longitudinale | −X, dalla staffa verso l'estremità libera |
+| Sezione trasversale | YZ, dorso convesso verso +Z, apertura verso −Z |
+| Bordo di montaggio | Sopra il bordo rinforzato inferiore, sotto l'asse del servo |
+| Servo e perno | Asse Z locale, coassiali come prima |
+| Movimento | Rotazione della pala attorno a Z, ereditando i movimenti del braccio e della base |
+
+Il gruppo fisso `ShovelBlade` applica una rotazione di **+90° attorno a X** al guscio, ai rinforzi e ai fissaggi della pala, seguita dalla traslazione `(0, −0.68, +0.275)` nelle coordinate normalizzate esistenti. La trasformazione è `(x, y, z) → (x, −z−0.68, y+0.275)`: conserva forma, spessori, lunghezza e orientamento delle facce, senza specchiature. Il bordo superiore si appoggia alla staffa. La staffa anteriore è collegata alla squadretta del servo tramite un breve distanziale coassiale; la duplicazione posteriore della staffa è stata rimossa. Il distanziale e i dettagli di fissaggio nascosti sono approssimazioni plausibili.
+
+Pivot, assi, segno delle rotazioni, angoli della sequenza, motori e resto del robot sono invariati. Sono invariati anche materiali, luci, camera pubblica, layout, contenuti e API della scena. Questa è una verifica della geometria visibile nelle foto, non un rilievo dimensionale o una validazione meccanica del prototipo fisico.
+
+Per ripetere la revisione dalla cartella Dark con il server 4174 attivo:
+
+```powershell
+node scripts/robot-fix-review.mjs
+```
+
+Lo script salva in `artifacts/robot-fix-review/` le tre pose `hero-dark-0.png`, `hero-dark-50.png`, `hero-dark-100.png`, il dettaglio `hero-dark-closeup-shovel.png`, le viste `hero-dark-shovel-side.png`, `hero-dark-shovel-top.png`, `hero-dark-shovel-opening.png`, lo screenshot mobile e `verification.json`. Verifica un contesto WebGL attivo prima di ogni acquisizione. Le Hero usano il bundle pubblico; le viste ravvicinate aggiungono accesso alla camera soltanto alla risposta intercettata da Playwright. Nessun controllo di debug è incluso nel bundle pubblicato. Screenshot e foto private restano esclusi da Git.
 
 ## Rendering e prestazioni
 
@@ -133,6 +158,7 @@ Canonico invariato: https://gabrielepellerito.com/. HTML semantico, ProfilePage/
 | `scripts/preview-worktrees.ps1` | Start, Status e Stop delle tre anteprime |
 | `scripts/robot-previews.mjs` | Screenshot delle tre pose e confronto Main |
 | `scripts/robot-harness.mjs` | Controllo della posa nel solo browser di test |
+| `scripts/robot-fix-review.mjs` | Tre pose Dark, dettaglio, profilo, apertura e vista superiore |
 | `scripts/robot-profile.mjs` | Campione locale di frame e rilascio risorse |
 | `tests/robot-model.test.mjs`, `tests/robot.spec.mjs` | Cinematica e WebGL reale |
 
@@ -176,7 +202,7 @@ Edge/Chromium installato è il browser predefinito; `BROWSER_CHANNEL=chrome` sel
 
 ## Verifiche
 
-Per ogni design: **34 test Playwright e 3 test Node**. Coprono contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale, tre giunti, reversibilità, geometria equivalente fra palette, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer.
+Revisione Dark del 30 ottobre 2026: **36 test Playwright e 5 test Node superati**. Coprono contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I nuovi test verificano la sezione rispetto al servo, il verso delle normali trasformate, l'appoggio della pala alla staffa, il raccordo coassiale e la separazione del guscio da tavola e motore lungo 201 pose. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
 
 Axe applica i controlli WCAG 2.2 AA alla pagina e al menu mobile; non sostituisce una certificazione manuale. I controlli geometrici verificano gerarchia e distanze dalla base lungo 201 pose: non sono una simulazione della dinamica, dei carichi o una verifica CAD completa delle collisioni.
 
@@ -186,7 +212,7 @@ Misurazione locale finale del 28 ottobre 2026: Lighthouse **100 performance, 100
 
 ## Git e pubblicazione futura
 
-I push vanno esclusivamente a `design/dark-editorial-3d` e `design/light-minimal-3d`. Main e backup originale restano invariati. I server locali non vengono arrestati dopo i test o il push.
+Per questo intervento e per i successivi miglioramenti del modello, salvo autorizzazione esplicita diversa, il solo branch modificabile è `design/dark-editorial-3d`. Eseguire push esclusivamente su `origin/design/dark-editorial-3d`. Main, Light e backup originale restano invariati. Non effettuare merge o pubblicazioni automatiche. I server locali non vengono arrestati dopo i test o il push.
 
 Per confrontare il codice usa i worktree esistenti, oppure `git diff main...design/dark-editorial-3d`. In un clone senza worktree usa `git switch` soltanto dopo aver salvato le modifiche e fermato il relativo server.
 

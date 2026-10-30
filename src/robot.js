@@ -91,11 +91,23 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   const shovelPivot = group('ShovelServoPivot', arm, [0, 1.91, .40]);
   const shovel = group('ShovelAssembly', shovelPivot);
   cylinder(shovel, 'ShovelServoHorn', .086, .025, [0, 0, .015], silver, 'z');
+  // Short coaxial standoff connects the horn to the visible front mounting plate.
+  // Hidden fastening dimensions are approximations, not prototype measurements.
+  cylinder(shovel, 'ShovelHornStandoff', .052, .035, [0, 0, .043], silver, 'z');
   const bracket = new Shape(); bracket.moveTo(-.23, -.20); bracket.lineTo(-.32, .09); bracket.lineTo(-.09, .31); bracket.lineTo(.10, .10); bracket.lineTo(.10, -.20); bracket.closePath();
   const bracketGeo = geometry(new ExtrudeGeometry(bracket, { depth: .025, bevelEnabled: true, bevelThickness: .006, bevelSize: .005, bevelSegments: 1, steps: 1 }));
-  for (const z of [-.33, .06]) mesh(shovel, 'ShovelSideBracket', bracketGeo, panel, [0, 0, z]);
+  mesh(shovel, 'ShovelSideBracket', bracketGeo, panel, [0, 0, .06]);
+  screw(shovel, 0, 0, .103);
   screw(shovel, -.085, .15, .095); screw(shovel, -.18, -.08, .095);
 
+  // IMG_0259/0261: longitudinal axis -X, convex back toward the visible front
+  // (+Z), concave opening toward the arm (-Z), reinforced rim below the joint.
+  // Roll ONLY the blade and its reinforcements +90 degrees around longitudinal X.
+  // Re-seat its upper rear edge at (y=-.18, z=.095) against the mounting plate:
+  // (x, y, z) -> (x, -z-.68, y+.275). This is a rigid rotation, never a mirror.
+  // The servo stays on local Z; this fixed mounting transform adds no actuator.
+  const blade = group('ShovelBlade', shovel, [0, -.68, .275]);
+  blade.rotation.x = Math.PI / 2;
   // Thin closed shell, broad curved face and rolled leading lip. Not a photograph.
   const nx = lowPower ? 14 : 26, nz = lowPower ? 8 : 14;
   const positions = [], indices = [], row = nz + 1, surface = (nx + 1) * row;
@@ -111,11 +123,11 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   for (let i = 0; i < nx; i++) { seam(i * row, (i + 1) * row); seam((i + 1) * row + nz, i * row + nz); }
   for (let j = 0; j < nz; j++) { seam(j + 1, j); seam(nx * row + j, nx * row + j + 1); }
   const shell = geometry(new BufferGeometry()); shell.setAttribute('position', new Float32BufferAttribute(positions, 3)); shell.setIndex(indices); shell.computeVertexNormals();
-  mesh(shovel, 'CurvedShovel', shell, panel);
-  box(shovel, 'ShovelLowerRail', [1.42, .035, .035], [-.9, -.20, .22], laminate, .005);
-  box(shovel, 'ShovelRearRail', [1.42, .035, .035], [-.9, -.20, -.50], laminate, .005);
-  box(shovel, 'ShovelEndSupport', [.06, .065, .71], [-.23, -.20, -.14], edge, .007);
-  for (const x of [-.32, -1.43]) screw(shovel, x, -.18, .243);
+  mesh(blade, 'CurvedShovel', shell, panel);
+  box(blade, 'ShovelLowerRail', [1.42, .035, .035], [-.9, -.20, .22], laminate, .005);
+  box(blade, 'ShovelRearRail', [1.42, .035, .035], [-.9, -.20, -.50], laminate, .005);
+  box(blade, 'ShovelEndSupport', [.06, .065, .71], [-.23, -.20, -.14], edge, .007);
+  for (const x of [-.32, -1.43]) screw(blade, x, -.18, .243);
   for (let i = 0; i < 3; i++) {
     const dx = i * .025;
     wire(arm, 'TerminalServoCable', [[.13 + dx, 2.17, .09], [.25 + dx, 1.91, .07], [.29 + dx, 1.13, .03], [.25 + dx, .44, .03], [.18 + dx, 0, .01], [.12 + dx, -.09, .02]], cableMat[i]);
@@ -123,7 +135,7 @@ export function createRobot({ light = false, lowPower = false } = {}) {
     wire(fixed, 'BaseSupplyCable', [[-.55, .81, .32 + dx], [-.79, .65, .39 + dx], [-.81, .32, .40 + dx], [-.77, .12, .39 + dx]], cableMat[i]);
   }
   for (const y of [.48, 1.22, 1.79]) box(arm, 'CableRetainer', [.11, .035, .085], [.255, y, .035], graphite, .004);
-  const tip = group('ShovelTip', shovel, [-1.6, -.06, -.14]);
+  const tip = group('ShovelTip', blade, [-1.6, -.06, -.14]);
   let pose;
   function setProgress(p) { pose = poseForProgress(p); basePivot.rotation.y = pose.base; armPivot.rotation.z = pose.arm; shovelPivot.rotation.z = pose.shovel; root.updateMatrixWorld(true); }
   setProgress(0);
