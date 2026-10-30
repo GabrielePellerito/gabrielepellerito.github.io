@@ -29,6 +29,13 @@ export function measureShovel(robot) {
   // CylinderGeometry's Y axis, transformed by the REAL shaft mesh's matrix.
   const B = new Vector3(0, 1, 0).transformDirection(find('ShovelOutputShaft').matrixWorld);
   const shell = find('CurvedShovel');
+  const rearMesh = find('RearAttachmentEdge'), plateMesh = find('MountingPlateSurface');
+  rearMesh.geometry.computeBoundingBox(); plateMesh.geometry.computeBoundingBox();
+  const rearLocal = rearMesh.geometry.boundingBox, plateLocal = plateMesh.geometry.boundingBox;
+  const rearTopEnds = [rearLocal.min.z, rearLocal.max.z].map(z => rearMesh.localToWorld(new Vector3(rearLocal.max.x, rearLocal.max.y, z)));
+  const plateTopEnds = [plateLocal.min.z, plateLocal.max.z].map(z => plateMesh.localToWorld(new Vector3(plateLocal.min.x, plateLocal.max.y, z)));
+  const shortEdge = rearTopEnds[1].clone().sub(rearTopEnds[0]).normalize();
+  const supportTopEdge = plateTopEnds[1].clone().sub(plateTopEnds[0]).normalize();
   const positions = shell.geometry.attributes.position, normals = shell.geometry.attributes.normal;
   let bottom = Infinity, floorIndex = 0;
   for (let i = 0; i < positions.count / 2; i++) {
@@ -40,6 +47,9 @@ export function measureShovel(robot) {
   return {
     A, B, pivot: robot.joints.shovelPivot.getWorldPosition(new Vector3()), attachment, free,
     contactCorners: contactCorners.map(world), platePoints: platePoints.map(world),
+    shortEdge, supportTopEdge,
+    topEdgeGap: Math.max(...rearTopEnds.map((p, i) => p.distanceTo(plateTopEnds[i]))),
+    topEdgeParallel: Math.abs(shortEdge.dot(supportTopEdge)),
     dot: A.dot(B), contactGap: Math.abs(rear.max.x - plate.min.x),
     contactContained: rear.min.y >= plate.min.y - 1e-7 && rear.max.y <= plate.max.y + 1e-7 && rear.min.z >= plate.min.z - 1e-7 && rear.max.z <= plate.max.z + 1e-7,
     openingNormal, floorHeight: bottom, rimHeight: front.max.y,

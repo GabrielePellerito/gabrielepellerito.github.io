@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import { root } from './update.mjs';
 import { mountRobot, setPose } from './robot-harness.mjs';
 
-const output = resolve(root, 'artifacts/shovel-correction');
+const output = resolve(process.env.REVIEW_ARTIFACTS || resolve(root, 'artifacts/shovel-correction'));
 const url = `http://127.0.0.1:${process.env.PORT || 4174}/`;
 await mkdir(output, { recursive: true });
 const source = await readFile(resolve(root, 'src/scene.js'), 'utf8');
@@ -65,6 +65,7 @@ try {
         await setPose(page, progress);
         const metrics = await page.evaluate(({ view, debug }) => window.__robotQA.inspectShovel({ view, debug }), { view, debug });
         assert.ok(Math.abs(metrics.dotAB) < 1e-7 && metrics.contactGap < 1e-7 && metrics.contactContained);
+        assert.ok(metrics.topEdgeGap < 1e-7 && metrics.topEdgeParallel > 1 - 1e-10);
         if (file.includes('orthographic')) {
           assert.equal(metrics.projection, 'orthographic');
           const expected = { right: [-1, 0, 0], rear: [0, 0, 1], top: [0, -1, 0], left: [1, 0, 0] }[view];

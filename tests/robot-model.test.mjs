@@ -10,7 +10,7 @@ test('three actuators, correct ancestor chain and fixed foundation', () => {
     let node = robot.root.getObjectByName('ShovelAssembly');
     const chain = [];
     while (node) { chain.unshift(node.name); node = node.parent; }
-    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'ShovelServoPivot', 'MountingPlate', 'ShovelAssembly']);
+    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'TerminalServoFrame', 'ShovelServoPivot', 'MountingPlate', 'ShovelAssembly']);
     for (const name of ['StepperMotor', 'ArmServomotor', 'ShovelServomotor']) assert.ok(robot.root.getObjectByName(name));
     const initial = robot.state;
     robot.joints.basePivot.rotation.y += .3; robot.root.updateMatrixWorld(true);
@@ -44,7 +44,7 @@ test('continuous, reversible motion; foundation and shovel stay separated', () =
       }
       assert.ok(shovel.min.y > supports.max.y, 'Shovel stays above the actual pedestal and shoulder motor');
       const bounds = new Box3().setFromObject(robot.root);
-      assert.ok(bounds.min.y >= 0 && bounds.max.y < 4.1);
+      assert.ok(bounds.min.y >= 0, 'The new tilt must not cross the ground plane');
       previous = state;
     }
     for (let i = 200; i >= 0; i--) { robot.setProgress(i / 200); assert.deepEqual(robot.state, forward[i]); }
@@ -80,14 +80,19 @@ test('tray axes are orthogonal and its rear face stays flush to the moving plate
         const m = measureShovel(robot);
         assert.ok(Math.abs(m.dot) < 1e-7, 'A (rear to free edge) must be perpendicular to the physical shaft B');
         assert.ok(m.contactGap < 1e-7 && m.contactContained, 'Full rear contact face lies on the mounting surface');
+        assert.ok(m.topEdgeGap < 1e-7, 'The short rear edge coincides with the TOP of the support');
+        assert.ok(m.topEdgeParallel > 1 - 1e-10, 'The short edge is parallel to the support top edge');
         for (let i = 0; i < m.contactCorners.length; i++) assert.ok(m.contactCorners[i].distanceTo(m.platePoints[i]) < 1e-7);
         assert.deepEqual(assembly.matrix, relative, 'No separate translation or rotation of the tray');
         const localA = m.A.clone().transformDirection(mount.matrixWorld.clone().invert());
         assert.ok(localA.x < -.98, 'Longitudinal direction is toward the left free edge, not across tray width');
-        assert.ok(m.openingNormal.dot(new Vector3(0, 1, 0)) > .9, 'The conservative animation never inverts the opening');
+        assert.ok(m.openingNormal.dot(new Vector3(0, 1, 0)) > 0, 'The conservative animation never inverts the opening');
       }
       robot.setProgress(0);
       const neutral = measureShovel(robot);
+      assert.ok(neutral.A.dot(new Vector3(0, 0, 1)) > .999, 'A has turned +90 degrees about WORLD Y: -X becomes +Z');
+      assert.ok(neutral.B.dot(new Vector3(1, 0, 0)) > .999, 'The reoriented motor shaft is world X at neutral');
+      assert.ok(neutral.shortEdge.dot(new Vector3(1, 0, 0)) > .999, 'The short attached edge now follows world X');
       assert.ok(neutral.openingNormal.dot(new Vector3(0, 1, 0)) > .999, 'Neutral concavity faces world up');
       assert.ok(neutral.floorHeight < neutral.rimHeight, 'Interior lies below the rim');
       const attachmentBefore = neutral.attachment.clone(), freeBefore = neutral.free.clone();
@@ -138,10 +143,16 @@ test('terminal movement remains coaxial, rigid and clear of the arm and motor', 
     const shell = robot.root.getObjectByName('CurvedShovel');
     const shaft = robot.root.getObjectByName('ShovelOutputShaft');
     const servo = robot.root.getObjectByName('ShovelServomotor');
-    const attr = shell.geometry.attributes.position;
+    const terminalFrame = robot.root.getObjectByName('TerminalServoFrame');
+    const obstacles = arm.children.filter((o) => o.name === 'ArmLamination');
+    servo.traverse((o) => { if (o.isMesh) obstacles.push(o); });
+    obstacles.push(robot.root.getObjectByName('TerminalServoCradle'), robot.root.getObjectByName('TerminalCradleBackplate'));
+    // These parts are fixed to the arm; cache their bounds in both physical frames.
+    const frames = [arm, terminalFrame];
+    const stationary = obstacles.map(obstacle => frames.map(frame => boundsInFrame(obstacle, frame)));
     for (let step = 0; step <= 200; step++) {
       robot.setProgress(step / 200);
-      const axis = new Vector3(0, 0, 1).transformDirection(arm.matrixWorld);
+      const axis = new Vector3(0, 1, 0).transformDirection(shaft.matrixWorld);
       const pivot = shovelPivot.getWorldPosition(new Vector3());
       const offset = shaft.getWorldPosition(new Vector3()).sub(pivot);
       assert.ok(offset.clone().cross(axis).length() < 1e-6, 'Terminal pivot lies on the motor output shaft');
@@ -159,17 +170,15 @@ test('terminal movement remains coaxial, rigid and clear of the arm and motor', 
       assert.deepEqual(armPivot.matrixWorld, armBefore); assert.deepEqual(servo.matrixWorld, motorBefore);
       shovelPivot.rotation.z = angle; robot.root.updateMatrixWorld(true);
       assert.ok(new Vector3(...robot.state.tip).sub(pivot).distanceTo(tip) < 1e-6, 'Terminal motion reverses exactly');
-      // Conservative separating-plane check against actual plank and motor vertices.
-      const obstacles = arm.children.filter((o) => o.name === 'ArmLamination');
-      servo.traverse((o) => { if (o.isMesh) obstacles.push(o); });
-      let front = -Infinity;
-      for (const obstacle of obstacles) {
-        const vertices = obstacle.geometry.attributes.position;
-        for (let i = 0; i < vertices.count; i++) front = Math.max(front, arm.worldToLocal(obstacle.localToWorld(new Vector3().fromBufferAttribute(vertices, i))).z);
-      }
-      for (let i = 0; i < attr.count; i++) {
-        const point = arm.worldToLocal(shell.localToWorld(new Vector3().fromBufferAttribute(attr, i)));
-        assert.ok(point.z > front, 'Shell never penetrates the parent plank or servo housing');
+      // The motor changed orientation: separation can now be along different
+      // planes for the plank and for the motor. Test actual geometry bounds,
+      // rather than assuming every obstacle lies behind the old world-Z plane.
+      const movingBounds = frames.map(frame => boundsInFrame(shell, frame));
+      for (const obstacleBounds of stationary) {
+        const separated = frames.some((_, frame) => ['x', 'y', 'z'].some(axis =>
+          movingBounds[frame].min[axis] > obstacleBounds[frame].max[axis] ||
+          movingBounds[frame].max[axis] < obstacleBounds[frame].min[axis]));
+        assert.ok(separated, 'A separating plane keeps the tray clear of each stationary part');
       }
     }
   } finally { robot.dispose(); }

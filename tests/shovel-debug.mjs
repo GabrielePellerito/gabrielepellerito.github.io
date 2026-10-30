@@ -11,7 +11,7 @@ export function renderShovelReview({ robot, scene, renderer }, { view = 'closeup
   const directions = { right: [1, 0, 0], rear: [0, 0, -1], top: [0, 1, 0], left: [-1, 0, 0] };
   let camera;
   if (directions[view]) {
-    const height = 2.05;
+    const height = 2.65;
     camera = new OrthographicCamera(-height * aspect / 2, height * aspect / 2, height / 2, -height / 2, .1, 40);
     camera.position.copy(target).addScaledVector(new Vector3(...directions[view]), 8);
     if (view === 'top') camera.up.set(0, 0, -1);
@@ -40,6 +40,7 @@ export function renderShovelReview({ robot, scene, renderer }, { view = 'closeup
     projection: camera.isOrthographicCamera ? 'orthographic' : 'perspective',
     cameraDirection: camera.getWorldDirection(new Vector3()).toArray(),
     A: m.A.toArray(), B: m.B.toArray(), dotAB: m.dot, contactGap: m.contactGap,
+    topEdgeGap: m.topEdgeGap, topEdgeParallel: m.topEdgeParallel,
     contactContained: m.contactContained, openingNormal: m.openingNormal.toArray(),
     progress: robot.state.progress, debug
   };
