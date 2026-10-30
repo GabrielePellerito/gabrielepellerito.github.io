@@ -10,7 +10,7 @@ test('three actuators, correct ancestor chain and fixed foundation', () => {
     let node = robot.root.getObjectByName('ShovelAssembly');
     const chain = [];
     while (node) { chain.unshift(node.name); node = node.parent; }
-    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'TerminalServoFrame', 'ShovelServoPivot', 'MountingPlate', 'ShovelAssembly']);
+    assert.deepEqual(chain, ['RobotRoot', 'BaseRotationPivot', 'RotatingStructure', 'ArmServoPivot', 'ArmAssembly', 'ShovelServoPivot', 'MountingPlate', 'ShovelAssembly']);
     for (const name of ['StepperMotor', 'ArmServomotor', 'ShovelServomotor']) assert.ok(robot.root.getObjectByName(name));
     const initial = robot.state;
     robot.joints.basePivot.rotation.y += .3; robot.root.updateMatrixWorld(true);
@@ -67,7 +67,7 @@ test('local palette option preserves mechanics; mobile geometry is lighter', () 
 
 // Definitive reference: an upward-open tray, with its entire rear flange flush
 // against the moving mounting plate. A and B are measured in world coordinates.
-test('tray axes are orthogonal and its rear face stays flush to the moving plate', () => {
+test('short edge is perpendicular to the original servo axis and stays flush to the plate', () => {
   for (const lowPower of [false, true]) {
     const robot = createRobot({ lowPower });
     try {
@@ -78,7 +78,8 @@ test('tray axes are orthogonal and its rear face stays flush to the moving plate
       for (let step = 0; step <= 200; step++) {
         robot.setProgress(step / 200);
         const m = measureShovel(robot);
-        assert.ok(Math.abs(m.dot) < 1e-7, 'A (rear to free edge) must be perpendicular to the physical shaft B');
+        assert.ok(Math.abs(m.shortEdgeAxisDot) < 1e-7, 'The SHORT edge must be perpendicular to the original shaft');
+        assert.ok(Math.abs(m.dot) > .999, 'The accepted tray length keeps its direction, parallel to the restored shaft');
         assert.ok(m.contactGap < 1e-7 && m.contactContained, 'Full rear contact face lies on the mounting surface');
         assert.ok(m.topEdgeGap < 1e-7, 'The short rear edge coincides with the TOP of the support');
         assert.ok(m.topEdgeParallel > 1 - 1e-10, 'The short edge is parallel to the support top edge');
@@ -91,7 +92,7 @@ test('tray axes are orthogonal and its rear face stays flush to the moving plate
       robot.setProgress(0);
       const neutral = measureShovel(robot);
       assert.ok(neutral.A.dot(new Vector3(0, 0, 1)) > .999, 'A has turned +90 degrees about WORLD Y: -X becomes +Z');
-      assert.ok(neutral.B.dot(new Vector3(1, 0, 0)) > .999, 'The reoriented motor shaft is world X at neutral');
+      assert.ok(neutral.B.dot(new Vector3(0, 0, 1)) > .999, 'The original motor shaft is world Z at neutral');
       assert.ok(neutral.shortEdge.dot(new Vector3(1, 0, 0)) > .999, 'The short attached edge now follows world X');
       assert.ok(neutral.openingNormal.dot(new Vector3(0, 1, 0)) > .999, 'Neutral concavity faces world up');
       assert.ok(neutral.floorHeight < neutral.rimHeight, 'Interior lies below the rim');
@@ -100,12 +101,13 @@ test('tray axes are orthogonal and its rear face stays flush to the moving plate
       robot.joints.shovelPivot.rotation.z += .12; robot.root.updateMatrixWorld(true);
       const tilted = measureShovel(robot);
       assert.notDeepEqual(mount.matrixWorld, mountBefore, 'The plate moves with the terminal servo');
-      assert.ok(tilted.free.distanceTo(freeBefore) > tilted.attachment.distanceTo(attachmentBefore), 'Free edge sweeps the larger arc');
+      assert.ok(tilted.free.distanceTo(freeBefore) > .01 && tilted.attachment.distanceTo(attachmentBefore) > .01, 'Both the plate attachment and free edge follow the restored shaft');
       assert.ok(tilted.contactGap < 1e-7, 'Contact is preserved while the servo tilts the tray');
       const web = new Box3().setFromObject(robot.root.getObjectByName('ServoDrivePlate'));
       const face = new Box3().setFromObject(robot.root.getObjectByName('MountingPlateSurface'));
       const spacer = new Box3().setFromObject(robot.root.getObjectByName('ShovelHornStandoff'));
-      assert.ok(web.intersectsBox(face) && web.intersectsBox(spacer), 'The full mounting surface is connected to the output horn');
+      const bridge = new Box3().setFromObject(robot.root.getObjectByName('TerminalPlateBridge'));
+      assert.ok(web.intersectsBox(bridge) && bridge.intersectsBox(face) && web.intersectsBox(spacer), 'The retained mounting plate is connected to the original output horn');
     } finally { robot.dispose(); }
   }
 });
@@ -143,12 +145,10 @@ test('terminal movement remains coaxial, rigid and clear of the arm and motor', 
     const shell = robot.root.getObjectByName('CurvedShovel');
     const shaft = robot.root.getObjectByName('ShovelOutputShaft');
     const servo = robot.root.getObjectByName('ShovelServomotor');
-    const terminalFrame = robot.root.getObjectByName('TerminalServoFrame');
     const obstacles = arm.children.filter((o) => o.name === 'ArmLamination');
     servo.traverse((o) => { if (o.isMesh) obstacles.push(o); });
-    obstacles.push(robot.root.getObjectByName('TerminalServoCradle'), robot.root.getObjectByName('TerminalCradleBackplate'));
-    // These parts are fixed to the arm; cache their bounds in both physical frames.
-    const frames = [arm, terminalFrame];
+    // The original motor is fixed directly to the arm again.
+    const frames = [arm];
     const stationary = obstacles.map(obstacle => frames.map(frame => boundsInFrame(obstacle, frame)));
     for (let step = 0; step <= 200; step++) {
       robot.setProgress(step / 200);
@@ -170,9 +170,7 @@ test('terminal movement remains coaxial, rigid and clear of the arm and motor', 
       assert.deepEqual(armPivot.matrixWorld, armBefore); assert.deepEqual(servo.matrixWorld, motorBefore);
       shovelPivot.rotation.z = angle; robot.root.updateMatrixWorld(true);
       assert.ok(new Vector3(...robot.state.tip).sub(pivot).distanceTo(tip) < 1e-6, 'Terminal motion reverses exactly');
-      // The motor changed orientation: separation can now be along different
-      // planes for the plank and for the motor. Test actual geometry bounds,
-      // rather than assuming every obstacle lies behind the old world-Z plane.
+      // Check separating planes using the actual stationary and moving geometry.
       const movingBounds = frames.map(frame => boundsInFrame(shell, frame));
       for (const obstacleBounds of stationary) {
         const separated = frames.some((_, frame) => ['x', 'y', 'z'].some(axis =>

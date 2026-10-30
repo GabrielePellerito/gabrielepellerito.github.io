@@ -24,6 +24,7 @@ export function renderShovelReview({ robot, scene, renderer }, { view = 'closeup
   if (debug) {
     helpers.add(new ArrowHelper(m.A, m.attachment, 1.0, 0x40d9ff, .11, .05));
     helpers.add(new ArrowHelper(m.B, m.pivot, .85, 0xffc34a, .11, .05));
+    helpers.add(new ArrowHelper(m.shortEdge, m.attachment, .65, 0xbb95ff, .09, .045));
     const pivot = new Mesh(new SphereGeometry(.034, 16, 10), new MeshBasicMaterial({ color: 0xf56cf0 }));
     pivot.position.copy(m.pivot); helpers.add(pivot);
     // The actual contact face is highlighted even through the opaque flange.
@@ -39,7 +40,7 @@ export function renderShovelReview({ robot, scene, renderer }, { view = 'closeup
   const report = {
     projection: camera.isOrthographicCamera ? 'orthographic' : 'perspective',
     cameraDirection: camera.getWorldDirection(new Vector3()).toArray(),
-    A: m.A.toArray(), B: m.B.toArray(), dotAB: m.dot, contactGap: m.contactGap,
+    A: m.A.toArray(), B: m.B.toArray(), dotAB: m.dot, shortEdgeAxisDot: m.shortEdgeAxisDot, contactGap: m.contactGap,
     topEdgeGap: m.topEdgeGap, topEdgeParallel: m.topEdgeParallel,
     contactContained: m.contactContained, openingNormal: m.openingNormal.toArray(),
     progress: robot.state.progress, debug

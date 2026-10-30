@@ -47,7 +47,7 @@ export function measureShovel(robot) {
   return {
     A, B, pivot: robot.joints.shovelPivot.getWorldPosition(new Vector3()), attachment, free,
     contactCorners: contactCorners.map(world), platePoints: platePoints.map(world),
-    shortEdge, supportTopEdge,
+    shortEdge, supportTopEdge, shortEdgeAxisDot: shortEdge.dot(B),
     topEdgeGap: Math.max(...rearTopEnds.map((p, i) => p.distanceTo(plateTopEnds[i]))),
     topEdgeParallel: Math.abs(shortEdge.dot(supportTopEdge)),
     dot: A.dot(B), contactGap: Math.abs(rear.max.x - plate.min.x),

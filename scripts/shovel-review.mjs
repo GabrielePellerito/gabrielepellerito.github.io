@@ -64,7 +64,7 @@ try {
       ]) {
         await setPose(page, progress);
         const metrics = await page.evaluate(({ view, debug }) => window.__robotQA.inspectShovel({ view, debug }), { view, debug });
-        assert.ok(Math.abs(metrics.dotAB) < 1e-7 && metrics.contactGap < 1e-7 && metrics.contactContained);
+        assert.ok(Math.abs(metrics.shortEdgeAxisDot) < 1e-7 && metrics.contactGap < 1e-7 && metrics.contactContained);
         assert.ok(metrics.topEdgeGap < 1e-7 && metrics.topEdgeParallel > 1 - 1e-10);
         if (file.includes('orthographic')) {
           assert.equal(metrics.projection, 'orthographic');
@@ -73,8 +73,8 @@ try {
         }
         await page.locator('#qa-legend').evaluate((label, { file, metrics }) => {
           label.textContent = `${file} | ${metrics.projection} | progress ${metrics.progress}\n` +
-            (metrics.debug ? 'A ciano: bordo fissato → bordo libero | B ambra: albero servo\nP magenta: pivot | verde: superficie di fissaggio\n' : '') +
-            `dot(A,B) = ${metrics.dotAB.toExponential(2)} | distacco = ${metrics.contactGap.toExponential(2)} (unità del modello)`;
+            (metrics.debug ? 'A ciano: lunghezza pala | B ambra: albero servo | C viola: bordo corto\nP magenta: pivot | verde: superficie di fissaggio\n' : '') +
+            `dot(C,B) = ${metrics.shortEdgeAxisDot.toExponential(2)} | distacco = ${metrics.contactGap.toExponential(2)} (unità del modello)`;
         }, { file, metrics });
         await capture(file, metrics, true);
       }

@@ -88,34 +88,27 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   cylinder(arm, 'ArmHornSpacer', .025, .29, [0, .23, .20], silver, 'z');
   screw(arm, 0, 0, .373); screw(arm, 0, .23, .373);
   for (const y of [.55, 1.38, 2.26]) for (const x of [-.145, .145]) screw(arm, x, y, .074);
-  // The requested +90-degree turn is around WORLD vertical Y in the neutral pose.
-  // Reorient the terminal motor too: its shaft becomes world X, so it still tilts
-  // the tray instead of rolling it around its now-forward longitudinal axis Z.
-  const neutral = poseForProgress(0);
-  const terminalFrame = group('TerminalServoFrame', arm, [0, 1.91, .40]);
-  terminalFrame.rotation.set(0, Math.PI / 2, -neutral.arm, 'ZYX');
-  servo(terminalFrame, 'ShovelServomotor', [0, .125, -.195], true);
-  // Stationary cradle joins the reoriented housing to the existing plank.
-  // These concealed mounting dimensions are illustrative, not measured hardware.
-  box(terminalFrame, 'TerminalServoCradle', [.22, .32, .22], [.245, .125, -.195], edge, .006);
-  box(terminalFrame, 'TerminalCradleBackplate', [.04, .38, .28], [.35, .125, -.17], panel, .004);
-  cylinder(terminalFrame, 'ShovelOutputShaft', .05, .16, [0, 0, -.045], silver, 'z');
-  const shovelPivot = group('ShovelServoPivot', terminalFrame);
+  // Restore the ORIGINAL terminal servo and shaft, including their mounting
+  // position. Keep the tray's accepted +90-degree vertical orientation intact.
+  // The SHORT edge, not the longitudinal axis, is perpendicular to the shaft.
+  servo(arm, 'ShovelServomotor', [0, 2.035, .205], true);
+  cylinder(arm, 'ShovelOutputShaft', .05, .16, [0, 1.91, .355], silver, 'z');
+  const shovelPivot = group('ShovelServoPivot', arm, [0, 1.91, .40]);
+  cylinder(shovelPivot, 'ShovelServoHorn', .086, .025, [0, 0, .015], silver, 'z');
+  cylinder(shovelPivot, 'ShovelHornStandoff', .052, .035, [0, 0, .043], silver, 'z');
+  // Rigid bridge from the original output to the retained tray plate.
+  // Hidden fastening dimensions are illustrative, not measured hardware.
+  box(shovelPivot, 'ServoDrivePlate', [.30, .34, .045], [.07, .01, .065], panel, 0);
+  box(shovelPivot, 'TerminalPlateBridge', [.18, .30, .15], [.13, .03, .155], edge, .004);
+  screw(shovelPivot, 0, 0, .098);
+  screw(shovelPivot, .14, .11, .098);
   const mountingPlate = group('MountingPlate', shovelPivot);
-  // Mounting zero only: preserve the original servo-angle curve and travel.
-  mountingPlate.rotation.z = -neutral.shovel;
-  cylinder(mountingPlate, 'ShovelServoHorn', .086, .025, [0, 0, .015], silver, 'z');
-  // Short coaxial standoff connects the horn to the visible front mounting plate.
-  // Hidden fastening dimensions are approximations, not prototype measurements.
-  cylinder(mountingPlate, 'ShovelHornStandoff', .052, .035, [0, 0, .043], silver, 'z');
-  // Folded mounting plate: drive web in XY, full rear attachment face in YZ.
-  // In the mounting frame the shaft is Z and the tray extends along -X.
-  // After the vertical turn these become world X and +Z in the neutral pose.
+  mountingPlate.rotation.y = Math.PI / 2;
+  // Same world transform as the previously accepted tray in the neutral pose.
+  // In this frame the short edge is Z, the longitudinal direction is -X.
+  // At neutral they become world X and +Z; the restored shaft is world Z.
   // Contact planes coincide at x=-.255. No decorative gap or independent pivot.
-  box(mountingPlate, 'ServoDrivePlate', [.30, .34, .045], [-.07, .01, .065], panel, 0);
   box(mountingPlate, 'MountingPlateSurface', [.035, .30, .86], [-.2375, .03, .47], panel, 0);
-  screw(mountingPlate, 0, 0, .098);
-  screw(mountingPlate, -.14, .11, .098);
   // The SHORT rear edge is now parallel to world X and flush with the TOP edge
   // of the mounting surface (both at mounting-frame y=.18), not hanging below it.
   const shovel = group('ShovelAssembly', mountingPlate, [0, .10, 0]);
@@ -150,11 +143,9 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   box(shovel, 'FreeFrontEdge', [.026, .028, (halfWidth - cornerRadius) * 2], [rearX - length, rimY - .014, centerZ], laminate, .009);
   for (const z of [.18, .76]) screw(shovel, rearX - .042, .048, z, 'x');
   group('RearAttachmentDatum', shovel, [rearX, rimY, centerZ]);
-  terminalFrame.updateMatrix();
   for (let i = 0; i < 3; i++) {
     const dx = i * .025;
-    const terminalExit = new Vector3(.145, .24 + dx, -.25).applyMatrix4(terminalFrame.matrix).toArray();
-    wire(arm, 'TerminalServoCable', [terminalExit, [-.33, 2.30 + dx, .16], [.25 + dx, 1.91, .07], [.29 + dx, 1.13, .03], [.25 + dx, .44, .03], [.18 + dx, 0, .01], [.12 + dx, -.09, .02]], cableMat[i]);
+    wire(arm, 'TerminalServoCable', [[.13 + dx, 2.17, .09], [.25 + dx, 1.91, .07], [.29 + dx, 1.13, .03], [.25 + dx, .44, .03], [.18 + dx, 0, .01], [.12 + dx, -.09, .02]], cableMat[i]);
     wire(rotating, 'ShoulderServiceLoop', [[.13 + dx, .64, .06], [.38 + dx, .42, .07], [.40 + dx, .15, .18], [.25 + dx, .09, .49], [-.37 + dx, .07, .50], [-.52 + dx, .05, .34]], cableMat[i]);
     wire(fixed, 'BaseSupplyCable', [[-.55, .81, .32 + dx], [-.79, .65, .39 + dx], [-.81, .32, .40 + dx], [-.77, .12, .39 + dx]], cableMat[i]);
   }
