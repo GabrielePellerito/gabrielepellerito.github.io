@@ -98,13 +98,16 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   cylinder(shovelPivot, 'ShovelHornStandoff', .052, .035, [0, 0, .043], silver, 'z');
   // Rigid bridge from the original output to the retained tray plate.
   // Hidden fastening dimensions are illustrative, not measured hardware.
-  box(shovelPivot, 'ServoDrivePlate', [.30, .34, .045], [.07, .01, .065], panel, 0);
-  box(shovelPivot, 'TerminalPlateBridge', [.18, .30, .15], [.13, .03, .155], edge, .004);
+  box(shovelPivot, 'ServoDrivePlate', [.30, .34, .045], [-.07, .01, .065], panel, 0);
+  box(shovelPivot, 'TerminalPlateBridge', [.18, .30, .15], [-.13, .03, .155], edge, .004);
   screw(shovelPivot, 0, 0, .098);
-  screw(shovelPivot, .14, .11, .098);
-  const mountingPlate = group('MountingPlate', shovelPivot);
+  screw(shovelPivot, -.14, .11, .098);
+  // Move to the OPPOSITE lateral edge of the original servo. The plate/tray
+  // center shifts from +.47 to -.47 along the output frame's X, without any
+  // rotation or mirrored geometry. The active stroke now travels inward.
+  const mountingPlate = group('MountingPlate', shovelPivot, [-.94, 0, 0]);
   mountingPlate.rotation.y = Math.PI / 2;
-  // Same world transform as the previously accepted tray in the neutral pose.
+  // Preserve the accepted orientation; only the lateral mounting side changes.
   // In this frame the short edge is Z, the longitudinal direction is -X.
   // At neutral they become world X and +Z; the restored shaft is world Z.
   // Contact planes coincide at x=-.255. No decorative gap or independent pivot.

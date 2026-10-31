@@ -1,6 +1,6 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Braccio robotico artigianale · orientamento della pala conservato, servo terminale ripristinato · 30 ottobre 2026.
+Braccio robotico artigianale · pala fissata al bordo opposto, movimento verso l'interno · 31 ottobre 2026.
 
 Nero profondo, nome monumentale e cognome a contorno. Robot in grafite e antracite, metallo satinato, dettagli argentati e luce di bordo più marcata.
 
@@ -97,7 +97,7 @@ Intervalli **solo visivi**, non limiti misurati: base 0°…48°, braccio −14�
 
 ### Vaschetta e fissaggio secondo il riferimento definitivo
 
-La precedente interpretazione con guscio convesso frontale e apertura posteriore è superata. Il riferimento definisce la forma della vaschetta aperta e il fissaggio alla piastra. L'ultima correzione del proprietario richiede di **conservare l'orientamento attuale della pala** (già ruotata di +90° sulla verticale) e di **ripristinare il servo nel montaggio precedente**. Il vincolo corretto è la perpendicolarità fra il **bordo corto** e l'albero del servo; non va più applicato il precedente vincolo fra asse longitudinale e albero.
+Il riferimento definisce la forma della vaschetta aperta e il fissaggio alla piastra. La correzione richiesta dal proprietario **conserva l'orientamento della pala** (ruotata di +90° sulla verticale) e **l'orientamento originale del servo**, spostando il fissaggio sul bordo laterale opposto. Il vincolo è la perpendicolarità fra il **bordo corto** e l'albero del servo; non fra asse longitudinale e albero.
 
 | Elemento | Relazione nel riferimento locale del servo terminale |
 | --- | --- |
@@ -111,17 +111,19 @@ La precedente interpretazione con guscio convesso frontale e apertura posteriore
 
 Nel riferimento locale della piastra, la faccia a `x = −0.255` coincide con quella della flangia della vaschetta. Il bordo corto posteriore e il bordo superiore del supporto coincidono a `y = 0.18`; la pala è stata rialzata di 0.10 unità rispetto al montaggio precedente. Due fissaggi attraversano l'interfaccia lungo X locale. Il guscio conserva fondo ribassato, bordi rialzati, estremità arrotondata e spessore finito.
 
-Motore, albero e cablaggio terminale sono tornati al montaggio del commit `e5d75ad`. La staffa laterale introdotta per riorientare il motore è stata rimossa. `MountingPlate` conserva la rotazione verticale della pala; un raccordo rigido collega la piastra all'uscita originale del servo senza cambiare la posa neutra della vaschetta. La funzione degli angoli e le escursioni dei tre attuatori restano invariate. Tutte le dimensioni sono proporzioni normalizzate; raccordo, distanziale e fissaggi nascosti sono approssimazioni, non specifiche misurate del prototipo.
+Motore, albero e cablaggio terminale conservano il montaggio originale. `MountingPlate` mantiene la rotazione verticale della pala e viene traslata di −0.94 lungo X nel riferimento dell'uscita: il centro della vaschetta passa dal lato +0.47 al lato −0.47 dell'albero. Pala e piastra non vengono ruotate né specchiate. Il raccordo rigido e il suo fissaggio laterale seguono il nuovo lato, mantenendo il collegamento all'uscita del servo.
 
-Il centro del giunto terminale, gli intervalli angolari, il basamento e il braccio principale sono invariati. L'asse del servo torna a quello originale; posizione, forma e orientamento della pala nella posa neutra sono conservati rispetto alla revisione `11223ba`. Materiali, luci, layout, contenuti, camera e API restano invariati.
+Con gli stessi angoli, la corsa attiva del servo (progresso 0.50–0.78) porta la vaschetta dall'esterno verso il braccio. Il piccolo assestamento finale già presente rimane invariato; la posizione finale resta più interna di quella iniziale. Il test misura entrambi i bordi nel riferimento del braccio, escludendo il movimento della base e del primo servo, e verifica anche il ritorno alla posizione iniziale.
+
+Il centro e l'asse del giunto terminale, gli intervalli angolari, il basamento, il braccio principale, la forma e l'orientamento della pala sono invariati rispetto alla revisione `31f928b`. Materiali, luci, layout, contenuti, camera e API restano invariati. Tutte le dimensioni sono proporzioni normalizzate; raccordo, distanziale e fissaggi nascosti sono approssimazioni, non specifiche misurate del prototipo.
 
 Per ripetere la revisione dalla cartella Dark con il server 4174 attivo:
 
 ```powershell
 node scripts/shovel-review.mjs
 
-# Per conservare separatamente le viste con il servo ripristinato:
-$env:REVIEW_ARTIFACTS = Join-Path (Get-Location) 'artifacts/shovel-servo-restored'
+# Per conservare separatamente le viste del fissaggio sul bordo opposto:
+$env:REVIEW_ARTIFACTS = Join-Path (Get-Location) 'artifacts/shovel-inward-mount'
 node scripts/shovel-review.mjs
 Remove-Item Env:REVIEW_ARTIFACTS
 ```
@@ -220,7 +222,7 @@ Edge/Chromium installato è il browser predefinito; `BROWSER_CHANNEL=chrome` sel
 
 ## Verifiche
 
-La suite Dark comprende **36 test Playwright e 6 test Node**. Copre contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I controlli geometrici misurano la perpendicolarità fra bordo corto C e albero B nello stesso sistema mondiale; verificano contatto e contenimento della faccia posteriore lungo 201 pose, coincidenza del bordo corto con quello superiore del supporto, orientamento neutro della pala conservato, asse originale del servo, raccordo solidale e separazione da tavola e motore. La tolleranza numerica per ortogonalità e distacco è 1e−7. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
+La suite Dark comprende **36 test Playwright e 7 test Node**. Copre contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I controlli geometrici misurano la perpendicolarità fra bordo corto C e albero B nello stesso sistema mondiale; verificano contatto e contenimento della faccia posteriore lungo 201 pose, coincidenza del bordo corto con quello superiore del supporto, orientamento neutro della pala conservato, asse originale del servo, raccordo solidale e separazione da tavola e motore. Un test dedicato verifica la corsa dall'esterno verso l'interno con il fissaggio sul bordo opposto. La tolleranza numerica per ortogonalità e distacco è 1e−7. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
 
 Axe applica i controlli WCAG 2.2 AA alla pagina e al menu mobile; non sostituisce una certificazione manuale. I controlli geometrici verificano gerarchia e distanze dalla base lungo 201 pose: non sono una simulazione della dinamica, dei carichi o una verifica CAD completa delle collisioni.
 

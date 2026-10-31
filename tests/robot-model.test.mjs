@@ -137,6 +137,35 @@ test('open tray has raised side rims, a rounded free end and outward-facing inne
   }
 });
 
+test('opposite-edge mounting drives the active stroke from outside toward the arm', () => {
+  const robot = createRobot();
+  try {
+    const arm = robot.root.getObjectByName('ArmAssembly');
+    const pivotX = robot.joints.shovelPivot.position.x;
+    const distance = () => {
+      const m = measureShovel(robot);
+      const attachment = arm.worldToLocal(m.attachment.clone());
+      const tip = arm.worldToLocal(m.free.clone());
+      assert.ok(attachment.x < pivotX && tip.x < pivotX, 'The tray is on the opposite, left side of the shaft');
+      return { rear: pivotX - attachment.x, free: pivotX - tip.x };
+    };
+    // The base and parent arm are removed from this measurement so their motion
+    // cannot fake an inward stroke of the terminal actuator.
+    robot.setProgress(.5); const start = distance(); let previous = start;
+    for (let step = 1; step <= 100; step++) {
+      robot.setProgress(.5 + .28 * step / 100);
+      const current = distance();
+      assert.ok(current.rear <= previous.rear + 1e-9 && current.free <= previous.free + 1e-9, 'Both fixed and free edges move inward throughout the active servo stroke');
+      previous = current;
+    }
+    assert.ok(previous.rear < start.rear && previous.free < start.free);
+    robot.setProgress(1); const settled = distance();
+    assert.ok(settled.rear < start.rear && settled.free < start.free, 'Final settling keeps the tray inward of its starting location');
+    robot.setProgress(.5); const reversed = distance();
+    assert.ok(Math.abs(reversed.rear - start.rear) < 1e-9 && Math.abs(reversed.free - start.free) < 1e-9);
+  } finally { robot.dispose(); }
+});
+
 test('terminal movement remains coaxial, rigid and clear of the arm and motor', () => {
   const robot = createRobot();
   try {
