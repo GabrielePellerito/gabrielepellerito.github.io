@@ -23,10 +23,10 @@
 /* The robot preview keeps the entire silhouette visible inside project cards. */
 .project-media:has(img[src$="sculpture.webp"]) img{object-fit:contain;padding:28px 20px 50px}.project-media:has(img[src$="sculpture.webp"]){background:var(--bg)}
 
-/* Progressive enhancement: only a working WebGL scene reserves narrative space. */
+/* Reserve the sticky runway before WebGL loads; main.js releases it on failure. */
 .story-hud,.portal-wash{display:none}
 :is(.cinema-active,.story-layout){--header-height:89px}
-:is(.cinema-active,.story-layout) .hero{height:calc(100svh - var(--header-height));overflow:visible;--story-title:1;--story-progress:0;--story-dissolve:0;--story-wash:0}
+:is(.cinema-active,.story-layout) .hero{height:480svh;overflow:visible;--story-title:1;--story-progress:0;--story-dissolve:0;--story-wash:0}
 :is(.cinema-active,.story-layout) .hero-sticky{position:sticky;top:var(--header-height);height:calc(100svh - var(--header-height));min-height:480px;overflow:clip;background:var(--bg);isolation:isolate}
 :is(.cinema-active,.story-layout) .hero-meta{position:relative;z-index:5;padding-top:26px}
 :is(.cinema-active,.story-layout) .hero-stage{position:absolute;inset:0;width:100%;height:100%;min-height:0}
@@ -44,19 +44,17 @@
 .story-skip{font:10px var(--mono);min-height:44px;display:inline-flex;align-items:center;gap:18px;color:#ddd}
 .story-skip:hover{color:#fff}.story-skip svg{width:16px}
 :is(.cinema-active,.story-layout) .portal-wash{display:block;position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(ellipse at 67% 62%,#eee 0%,#c5c5c5 40%,#444 100%);opacity:var(--story-wash)}
-.cinema-active #chi-sono{position:relative;margin-top:-65svh;z-index:8;isolation:isolate;padding-top:12svh;min-height:100svh}
-.cinema-active #chi-sono:before{content:'';position:absolute;z-index:-1;inset:0 calc((min(1328px,100vw - 112px) - 100vw)/2);background:linear-gradient(transparent,var(--bg) 8svh)}
-@media(max-width:1100px){:is(.cinema-active,.story-layout) .hero-title-wrap{left:36px}.cinema-active #chi-sono:before{left:-36px;right:-36px}}
-@media(max-width:800px){:is(.cinema-active,.story-layout){--header-height:77px}.cinema-active .hero{height:340svh}:is(.cinema-active,.story-layout) .hero-title-wrap{top:8%;left:24px;width:90%}:is(.cinema-active,.story-layout) h1{font-size:clamp(50px,12.5vw,95px);letter-spacing:-4px}:is(.cinema-active,.story-layout) .hero-greeting{margin-bottom:12px}:is(.cinema-active,.story-layout) .sculpture-stage{top:18%;right:-5%;width:110%;height:78%}:is(.cinema-active,.story-layout) .hero-meta{padding-top:14px}:is(.cinema-active,.story-layout) .edition{display:none}:is(.cinema-active,.story-layout) .hero-bottom{display:none}:is(.cinema-active,.story-layout) .story-hud{bottom:14px}.story-chapter{font-size:8px;letter-spacing:.5px;width:58%}.story-chapter b{margin-right:8px}.story-skip{font-size:9px;gap:8px;max-width:105px}.cinema-active #chi-sono:before{left:-24px;right:-24px}.cinema-active #chi-sono{margin-top:-58svh}}
-@media(max-width:600px){:is(.cinema-active,.story-layout) .hero-title-wrap{left:20px}:is(.cinema-active,.story-layout) .sculpture-stage{top:22%;height:72%}.cinema-active #chi-sono:before{left:-20px;right:-20px}}
+:is(.cinema-active,.story-layout) #chi-sono{position:relative;margin-top:-65svh;z-index:8;isolation:isolate;padding-top:12svh;min-height:100svh}
+:is(.cinema-active,.story-layout) #chi-sono:before{content:'';position:absolute;z-index:-1;inset:0 calc((min(1328px,100vw - 112px) - 100vw)/2);background:linear-gradient(transparent,var(--bg) 8svh)}
+@media(max-width:1100px){:is(.cinema-active,.story-layout) .hero-title-wrap{left:36px}:is(.cinema-active,.story-layout) #chi-sono:before{left:-36px;right:-36px}}
+@media(max-width:800px){:is(.cinema-active,.story-layout){--header-height:77px}:is(.cinema-active,.story-layout) .hero{height:340svh}:is(.cinema-active,.story-layout) .hero-title-wrap{top:8%;left:24px;width:90%}:is(.cinema-active,.story-layout) h1{font-size:clamp(50px,12.5vw,95px);letter-spacing:-4px}:is(.cinema-active,.story-layout) .hero-greeting{margin-bottom:12px}:is(.cinema-active,.story-layout) .sculpture-stage{top:18%;right:-5%;width:110%;height:78%}:is(.cinema-active,.story-layout) .hero-meta{padding-top:14px}:is(.cinema-active,.story-layout) .edition{display:none}:is(.cinema-active,.story-layout) .hero-bottom{display:none}:is(.cinema-active,.story-layout) .story-hud{bottom:14px}.story-chapter{font-size:8px;letter-spacing:.5px;width:58%}.story-chapter b{margin-right:8px}.story-skip{font-size:9px;gap:8px;max-width:105px}:is(.cinema-active,.story-layout) #chi-sono:before{left:-24px;right:-24px}:is(.cinema-active,.story-layout) #chi-sono{margin-top:-58svh}}
+@media(max-width:600px){:is(.cinema-active,.story-layout) .hero-title-wrap{left:20px}:is(.cinema-active,.story-layout) .sculpture-stage{top:22%;height:72%}:is(.cinema-active,.story-layout) #chi-sono:before{left:-20px;right:-20px}}
 @media(max-height:650px) and (min-width:801px){:is(.cinema-active,.story-layout) .hero-sticky{min-height:360px}:is(.cinema-active,.story-layout) .hero-title-wrap{top:17%}:is(.cinema-active,.story-layout) h1{font-size:9vw}:is(.cinema-active,.story-layout) .hero-bottom{bottom:75px}:is(.cinema-active,.story-layout) .hero-description p{font-size:10px}}
-@media(prefers-reduced-motion:reduce){:is(.cinema-active,.story-layout) .hero{height:auto}:is(.cinema-active,.story-layout) .hero-sticky{position:relative;height:auto}.cinema-active #chi-sono{margin-top:0}}
+@media(prefers-reduced-motion:reduce){:is(.cinema-active,.story-layout) .hero{height:auto}:is(.cinema-active,.story-layout) .hero-sticky{position:relative;height:auto}:is(.cinema-active,.story-layout) #chi-sono{margin-top:0}}
 @media(min-width:801px){:is(.cinema-active,.story-layout) .sculpture-stage{right:0;width:100%}}
 /* Full-width transition backdrop, including the 320px container gutter. */
-.cinema-active #chi-sono:before{left:50%;right:auto;width:100vw;transform:translateX(-50%)}
+:is(.cinema-active,.story-layout) #chi-sono:before{left:50%;right:auto;width:100vw;transform:translateX(-50%)}
 
-.cinema-active .hero{height:480svh}
-@media(max-width:800px){.cinema-active .hero{height:340svh}}
 .story-layout .sculpture-fallback{width:76%;left:24%}
 @media(max-width:800px){.story-layout .sculpture-fallback{width:100%;left:0}}
 

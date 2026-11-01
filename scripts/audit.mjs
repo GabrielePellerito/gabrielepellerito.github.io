@@ -1,4 +1,6 @@
 import lighthouse from 'lighthouse';
+import desktopConfig from 'lighthouse/core/config/desktop-config.js';
+import assert from 'node:assert/strict';
 import { launch } from 'chrome-launcher';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -7,8 +9,10 @@ const chrome = await launch({ chromePath: process.env.CHROME_PATH || 'C:/Program
 try {
   await mkdir(resolve(root, 'artifacts'), { recursive: true });
   for (const mode of ['desktop', 'mobile']) {
-    const options = { port: chrome.port, output: ['json', 'html'], logLevel: 'error', onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'], ...(mode === 'desktop' ? { preset: 'desktop' } : {}) };
-    const result = await lighthouse(`http://127.0.0.1:${process.env.PORT || 4174}`, options);
+    const options = { port: chrome.port, output: ['json', 'html'], logLevel: 'error', onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'] };
+    const result = await lighthouse(`http://127.0.0.1:${process.env.PORT || 4174}`, options, mode === 'desktop' ? desktopConfig : undefined);
+    assert.equal(result.lhr.configSettings.formFactor, mode, 'Il report deve usare il profilo richiesto');
+    assert.equal(result.lhr.configSettings.screenEmulation.mobile, mode === 'mobile');
     await writeFile(resolve(root, `artifacts/lighthouse-${mode}.json`), result.report[0]);
     await writeFile(resolve(root, `artifacts/lighthouse-${mode}.html`), result.report[1]);
     console.log(JSON.stringify({ mode, scores: Object.fromEntries(Object.entries(result.lhr.categories).map(([key, value]) => [key, Math.round(value.score * 100)])), LCP: result.lhr.audits['largest-contentful-paint'].displayValue, CLS: result.lhr.audits['cumulative-layout-shift'].displayValue, TBT: result.lhr.audits['total-blocking-time'].displayValue }));
