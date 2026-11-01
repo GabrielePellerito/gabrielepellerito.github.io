@@ -10,12 +10,16 @@ const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 
 try {
   if (!process.argv.includes('--social-only')) {
   const scenePage = await browser.newPage({ viewport: { width: 1100, height: 1100 }, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
-  await scenePage.goto(base + '/?render3d=1');
-  await scenePage.waitForSelector('.scene-ready canvas', { timeout: 30000 });
-  await scenePage.evaluate(() => {
-    const stage = document.querySelector('.sculpture-stage');
-    Object.assign(stage.style, { position: 'fixed', top: '0', left: '0', right: 'auto', width: '1000px', height: '1000px', zIndex: '100', background: getComputedStyle(document.body).backgroundColor });
-    document.querySelector('.sculpture-fallback').style.visibility = 'hidden';
+  // Isolated asset stage: a sticky stacking context must not capture the navbar.
+  await scenePage.goto(base + '/404.html');
+  await scenePage.evaluate(async () => {
+    document.body.replaceChildren();
+    const stage = document.createElement('div'); stage.className = 'sculpture-stage scene-ready';
+    const mount = document.createElement('div'); mount.className = 'scene-mount'; stage.append(mount); document.body.append(stage);
+    Object.assign(stage.style, { position: 'fixed', top: '0', left: '0', right: 'auto', width: '1000px', height: '1000px', background: '#080808' });
+    const module = await import('/assets/scene.bundle.js');
+    window.assetScene = module.createScene(mount, { framing: 'poster' });
+    if (!window.assetScene) throw new Error('Fallback capture requires real WebGL.');
   });
   await scenePage.waitForTimeout(500);
   await scenePage.locator('.sculpture-stage').screenshot({ path: resolve(root, 'assets/sculpture.png') });
@@ -27,6 +31,7 @@ try {
     return canvas.toDataURL('image/webp', .9).split(',')[1];
   }, base + '/assets/sculpture.png?capture=1');
   await writeFile(resolve(root, 'assets/sculpture.webp'), Buffer.from(webp, 'base64'));
+  await scenePage.evaluate(() => window.assetScene.dispose());
   await scenePage.close();
   }
   const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });

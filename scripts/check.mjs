@@ -12,6 +12,8 @@ const ignored = (await readFile(resolve(root, '.gitignore'), 'utf8')).toLowerCas
 for (const file of referenceFiles) assert.ok(ignored.includes('assets/' + file), `Riferimento da escludere: ${file}`);
 assert.ok(isPrivatePath('/ASSETS/CONTENUTI-CV-SITO-GABRIELE.MD'));
 const manifest = JSON.parse(await readFile(resolve(root, 'assets/scene-manifest.json'), 'utf8'));
+assert.equal(Object.keys(manifest.inputs || {}).length, 5, 'Manifesto della cinematica completo');
+for (const [path, hash] of Object.entries(manifest.inputs)) assert.equal(createHash('sha256').update(await readFile(resolve(root, path))).digest('hex'), hash, `Modulo non sincronizzato: ${path}`);
 for (const [key, path] of Object.entries({ source: 'src/scene.js', robot: 'src/robot.js', bundle: 'assets/scene.bundle.js' })) {
   assert.equal(createHash('sha256').update(await readFile(resolve(root, path))).digest('hex'), manifest[key], 'Scena non sincronizzata: npm.cmd run build:scene');
 }

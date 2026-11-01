@@ -1,9 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { mountRobot, setPose } from '../scripts/robot-harness.mjs';
 import { referenceFiles } from '../scripts/privacy.mjs';
+// Debris and luminous meshes upload lazily on their first visible phase.
+// Compare memory after the same complete warmup, including after context restore.
+async function warmNarrative(page) {
+  for (const p of [0, .5, .85, 1, 0]) await setPose(page, p);
+}
 
 test('three actual joint poses, reversible motion, no idle rendering', async ({ page, baseURL, isMobile }) => {
   await mountRobot(page, baseURL + '/', { lowPower: isMobile });
+  await warmNarrative(page);
   const initial = await setPose(page, 0);
   const halfway = await setPose(page, .5);
   const final = await setPose(page, 1);
@@ -25,6 +31,7 @@ test('three actual joint poses, reversible motion, no idle rendering', async ({ 
 
 test('real WebGL context loss/restoration, then GPU disposal', async ({ page, baseURL, isMobile }) => {
   await mountRobot(page, baseURL + '/', { lowPower: isMobile });
+  await warmNarrative(page);
   const before = await setPose(page, .5);
   const supported = await page.evaluate(() => {
     const gl = document.querySelector('canvas').getContext('webgl2');
@@ -37,6 +44,7 @@ test('real WebGL context loss/restoration, then GPU disposal', async ({ page, ba
   await expect(page.locator('.sculpture-fallback')).toHaveCSS('opacity', '1');
   await page.evaluate(() => window.__loseContext.restoreContext());
   await expect(page.locator('.sculpture-stage')).toHaveAttribute('data-renderer', 'webgl');
+  await warmNarrative(page);
   const restored = await setPose(page, .5);
   expect(restored.tip).toEqual(before.tip); expect(restored.lost).toBe(false);
   expect(restored.geometries).toBe(before.geometries);
@@ -52,6 +60,8 @@ test('rapid native scroll reverses the articulated pose without losing WebGL', a
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await mountRobot(page, baseURL + '/', { lowPower: isMobile });
+  await warmNarrative(page);
+  await page.evaluate(() => { window.__robotManual = false; });
   const initial = await page.evaluate(() => window.__robotQA.diagnostics);
   const heroHeight = await page.locator('.hero').evaluate((el) => el.offsetHeight);
   await page.evaluate((height) => scrollTo({ top: height * .65, behavior: 'instant' }), heroHeight);

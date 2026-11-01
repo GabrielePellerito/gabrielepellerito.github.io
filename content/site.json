@@ -407,5 +407,17 @@
     "pauseLabel": "Sospendi animazioni",
     "resumeLabel": "Riprendi animazioni",
     "baseCommit": "447a6a8"
+  },
+  "cinematic": {
+    "phases": [
+      "La forma di un'idea",
+      "Il primo movimento",
+      "Dentro la materia",
+      "Oltre la superficie",
+      "La luce, dall'interno",
+      "Un nuovo punto di vista"
+    ],
+    "skip": "Salta l'introduzione",
+    "hint": "Scorri per esplorare"
   }
 }

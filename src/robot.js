@@ -155,9 +155,12 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   for (const y of [.48, 1.22, 1.79]) box(arm, 'CableRetainer', [.11, .035, .085], [.255, y, .035], graphite, .004);
   const tip = group('ShovelTip', shovel, [rearX - length, rimY, centerZ]);
   let pose;
-  function setProgress(p) { pose = poseForProgress(p); basePivot.rotation.y = pose.base; armPivot.rotation.z = pose.arm; shovelPivot.rotation.z = pose.shovel; root.updateMatrixWorld(true); }
+  // The narrative may coordinate the SAME three joints; the accepted geometry,
+  // mounting transforms and original inspection poses remain unchanged.
+  function setPose(next) { pose = { ...next }; basePivot.rotation.y = pose.base; armPivot.rotation.z = pose.arm; shovelPivot.rotation.z = pose.shovel; root.updateMatrixWorld(true); }
+  function setProgress(p) { setPose(poseForProgress(p)); }
   setProgress(0);
-  return { root, joints: { basePivot, armPivot, shovelPivot }, setProgress,
+  return { root, joints: { basePivot, armPivot, shovelPivot }, setProgress, setPose,
     get state() { return { ...pose, tip: tip.getWorldPosition(new Vector3()).toArray(), rootRotation: root.rotation.toArray().slice(0, 3), basePosition: fixed.getWorldPosition(new Vector3()).toArray() }; },
     dispose() { for (const g of geometries) g.dispose(); for (const m of materials) m.dispose(); geometries.clear(); materials.clear(); root.removeFromParent(); }
   };

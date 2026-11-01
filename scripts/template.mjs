@@ -8,12 +8,16 @@ export function renderSite(d) {
 <body id="inizio">${navigation(d)}
 <main id="contenuto" tabindex="-1">
   <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-sticky">
     <div class="container hero-meta"><p class="eyebrow">${e(d.hero.eyebrow)}</p><span class="edition">${e(d.ui.footerText)} / 01</span></div>
     <div class="hero-stage container">
       <div class="hero-title-wrap"><p class="hero-greeting">${e(d.hero.greeting)}</p><h1 id="hero-title"><span>${e(d.person.firstName)}</span> <span class="outline-name">${e(d.person.lastName)}<span class="name-dot">.</span></span></h1></div>
       ${sculpture(d)}<span class="scene-coordinate" aria-hidden="true">${e(d.hero.artLabel)} / 3 DOF</span>
     </div>
     <div class="container hero-bottom"><div class="hero-description"><span class="tiny-cross" aria-hidden="true">+</span><p>${e(d.hero.intro)}</p></div><div class="hero-buttons"><a class="button button-primary" href="#${e(d.hero.primaryTarget)}">${e(d.hero.primaryLabel)}${arrow}</a><a class="text-link" href="#${e(d.hero.secondaryTarget)}">${e(d.hero.secondaryLabel)}${diagonal}</a></div><a class="scroll-cue" href="#chi-sono"><span>${e(d.hero.scrollLabel)}</span>${arrow}</a></div>
+    <div class="story-hud container"><div class="story-chapter" aria-hidden="true">${d.cinematic.phases.map((text, i) => `<span data-chapter="${i}"${i ? ' hidden' : ''}><b>${String(i + 1).padStart(2, '0')}</b> ${e(text)}</span>`).join('')}<div class="story-track"><i></i></div><span class="story-invite">${e(d.cinematic.hint)} &darr;</span></div><a class="story-skip" href="#chi-sono">${e(d.cinematic.skip)} ${arrow}</a></div>
+    <div class="portal-wash" aria-hidden="true"></div>
+    </div>
   </section>
   <section class="section container about" id="chi-sono" aria-labelledby="about-title"><div class="section-heading reveal">${label(d.about)}<h2 id="about-title">${e(d.about.title)}</h2></div><div class="about-body"><div class="about-text reveal">${d.about.placeholder ? badge(d) : ''}<h3>${e(d.about.intro)}</h3>${d.about.paragraphs.map((p) => `<p>${e(p)}</p>`).join('')}</div><aside class="personal-note reveal"><span class="note-star" aria-hidden="true">✳</span><p class="eyebrow">${e(d.about.noteLabel)}</p><p>${e(d.about.note)}</p><span class="note-signature" aria-hidden="true">${e(d.person.firstName)}.</span></aside></div></section>
   <section class="journey-band" id="percorso" aria-labelledby="journey-title"><div class="section container split-section"><div class="section-heading reveal">${label(d.journey)}<h2 id="journey-title">${e(d.journey.title)}</h2><p class="section-intro">${e(d.journey.intro)}</p></div>${journey(d, 'dark')}</div></section>
