@@ -2,8 +2,13 @@
 import { WebGLRenderer, Scene, PerspectiveCamera, Mesh, PlaneGeometry, ShadowMaterial, DirectionalLight, PMREMGenerator, ACESFilmicToneMapping, PCFShadowMap } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { createRobot } from './robot.js';
+import { timeline } from './timeline.js';
+import { excavationSite, cuttingPoint } from './digging.js';
+import { createTerrain } from './terrain.js';
+import { createAtmosphere } from './atmosphere.js';
+import { frameCinematicCamera } from './cinematic-camera.js';
 
-export function createScene(mount, { lowPower = false } = {}) {
+export function createScene(mount, { lowPower = false, framing = 'story' } = {}) {
   const light = mount.closest('[data-concept]')?.dataset.concept === 'light-minimal-3d';
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('webgl2', { alpha: true, antialias: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false });
@@ -16,6 +21,9 @@ export function createScene(mount, { lowPower = false } = {}) {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = PCFShadowMap;
   const scene = new Scene(); const camera = new PerspectiveCamera(32, 1, .1, 60);
   const robot = createRobot({ light, lowPower }); scene.add(robot.root);
+  const site = excavationSite(robot), terrain = createTerrain(site, { lowPower }), atmosphere = createAtmosphere(site, robot, { lowPower });
+  scene.add(terrain.root, atmosphere.root);
+  let state = timeline(0);
   const room = new RoomEnvironment(); const pmrem = new PMREMGenerator(renderer);
   let environmentTarget = pmrem.fromScene(room, .055);
   scene.environment = environmentTarget.texture; scene.environmentIntensity = light ? .7 : .65;
@@ -29,10 +37,8 @@ export function createScene(mount, { lowPower = false } = {}) {
   floor.rotation.x = -Math.PI / 2; floor.position.y = -.002; floor.receiveShadow = true; scene.add(floor);
   let disposed = false, lost = false, progress = 0, width = 0, height = 0, renderCount = 0;
   function frameCamera() {
-    const distance = 8.9 * Math.max(1, .9 / camera.aspect);
-    // View the upward-open tray from above its rim, including the neutral pose.
-    camera.position.set(3.5 / 8.9 * distance + progress * .18, 5.7, 7.9 / 8.9 * distance);
-    camera.lookAt(-.18, 1.95, 0); camera.updateProjectionMatrix();
+    frameCinematicCamera(camera, state, site);
+    if (framing === 'poster') { camera.clearViewOffset(); camera.lookAt(1.35, 1.7, .9); camera.updateProjectionMatrix(); }
   }
   function draw() { if (!disposed && !lost) { renderer.render(scene, camera); renderCount++; } }
   function resize() {
@@ -43,29 +49,31 @@ export function createScene(mount, { lowPower = false } = {}) {
   }
   const observer = new ResizeObserver(resize); observer.observe(mount);
   const stage = mount.parentElement;
-  const onLost = (event) => { event.preventDefault(); lost = true; stage.classList.remove('scene-ready'); stage.dataset.renderer = 'fallback'; };
+  const onLost = (event) => { event.preventDefault(); lost = true; stage.classList.remove('scene-ready'); stage.dataset.renderer = 'fallback'; stage.dispatchEvent(new CustomEvent('scene-availability', { detail: false })); };
   const onRestored = () => {
     if (disposed) return;
     // Render targets have no CPU pixels: regenerate PMREM after actual context loss.
     environmentTarget.dispose(); environmentTarget = pmrem.fromScene(room, .055); scene.environment = environmentTarget.texture;
-    lost = false; draw(); stage.classList.add('scene-ready'); stage.dataset.renderer = 'webgl';
+    lost = false; draw(); stage.classList.add('scene-ready'); stage.dataset.renderer = 'webgl'; stage.dispatchEvent(new CustomEvent('scene-availability', { detail: true }));
   };
   canvas.addEventListener('webglcontextlost', onLost); canvas.addEventListener('webglcontextrestored', onRestored);
   mount.append(canvas);
   function setProgress(value) {
     if (disposed) return;
     progress = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
-    robot.setProgress(progress); frameCamera(); stage.dataset.rotation = robot.state.base.toFixed(4); draw();
+    state = timeline(progress); robot.setPose(state); terrain.update(state); atmosphere.update(state);
+    key.intensity = 4.4 * (1 - state.light * .35); fill.intensity = .4 + state.light * .45;
+    frameCamera(); stage.dataset.rotation = robot.state.arm.toFixed(4); draw();
   }
   resize(); setProgress(0);
   return { setProgress,
     get progress() { return progress; },
     // Read-only diagnostics for Playwright; no public UI/global is installed.
-    get diagnostics() { return { ...robot.state, renderCount, lost, disposed, contextLost: context.isContextLost(), calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, pixelRatio: renderer.getPixelRatio() }; },
+    get diagnostics() { return { ...robot.state, narrative: { ...state, contact: cuttingPoint(robot).toArray(), site: site.center.toArray(), surfaceHeight: site.height, holeRadius: terrain.radius, camera: camera.position.toArray() }, renderCount, lost, disposed, contextLost: context.isContextLost(), calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, pixelRatio: renderer.getPixelRatio() }; },
     dispose() {
       if (disposed) return; disposed = true;
       observer.disconnect(); canvas.removeEventListener('webglcontextlost', onLost); canvas.removeEventListener('webglcontextrestored', onRestored);
-      robot.dispose(); floor.geometry.dispose(); floor.material.dispose(); key.shadow.dispose();
+      robot.dispose(); terrain.dispose(); atmosphere.dispose(); floor.geometry.dispose(); floor.material.dispose(); key.shadow.dispose();
       scene.environment = null; environmentTarget.dispose(); pmrem.dispose(); room.dispose();
       renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
     }

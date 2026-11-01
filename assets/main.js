@@ -8,6 +8,9 @@
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const stage = document.querySelector('.sculpture-stage');
   const hero = document.querySelector('.hero');
+  const sticky = hero.querySelector('.hero-sticky');
+  const chapters = [...document.querySelectorAll('[data-chapter]')];
+  let cinema = false;
   const enabledInContent = root.dataset.motionEnabled !== 'false';
   let userPaused = false;
   try { userPaused = localStorage.getItem('gp-motion') === 'off'; } catch { /* No persistence required. */ }
@@ -15,14 +18,15 @@
   let scene, frame = 0, active = true, current = 0, target = 0, start = 0, range = 1, loading = false;
   let tiltTarget = null, tiltX = 0, tiltY = 0, tiltFrame = 0;
   const moving = () => enabledInContent && !userPaused && !reduced.matches;
+  stage.addEventListener('scene-availability', event => setCinema(Boolean(event.detail) && moving()));
 
   function updateMotion() {
     root.dataset.motion = moving() ? 'on' : 'off';
     motionButton.setAttribute('aria-pressed', String(!moving()));
     motionButton.setAttribute('aria-label', moving() ? motionButton.dataset.pause : motionButton.dataset.resume);
     motionButton.disabled = reduced.matches || !enabledInContent;
-    if (!moving()) { cancelAnimationFrame(frame); frame = 0; root.classList.remove('motion-ready'); scene?.setProgress(0); resetTilt(); }
-    else { root.classList.add('motion-ready'); loadScene(); requestFrame(); }
+    if (!moving()) { cancelAnimationFrame(frame); frame = 0; root.classList.remove('motion-ready', 'story-layout'); scene?.setProgress(0); setCinema(false); resetTilt(); }
+    else { root.classList.add('motion-ready', 'story-layout'); if (scene) setCinema(true); loadScene(); requestFrame(); }
   }
   // Fixed labels are supplied by the content generator, rather than inferred from style.
   motionButton.dataset.pause = motionButton.getAttribute('aria-label');
@@ -50,8 +54,18 @@
   mobile.addEventListener('change', () => closeMenu());
 
   // Layout reads happen at resize, never inside the animation loop.
-  function measure() { start = hero.getBoundingClientRect().top + scrollY; range = Math.max(1, hero.offsetHeight * .95); onScroll(); }
-  function onScroll() { if (scrollY > 0) interacted = true; if (interacted) loadScene(); target = Math.min(1, Math.max(0, (scrollY - start) / range)); requestFrame(); }
+  function setCinema(enabled) {
+    if (cinema === enabled) return;
+    const before = document.querySelector('#chi-sono').getBoundingClientRect().top;
+    cinema = enabled; root.classList.toggle('cinema-active', enabled); root.classList.toggle('story-layout', enabled);
+    measure();
+    // Preserve an already reached section when pause/reduced-motion changes layout.
+    if (before < innerHeight * .6) { const after = document.querySelector('#chi-sono').getBoundingClientRect().top; scrollBy({ top: after - before, behavior: 'instant' }); }
+    if (enabled && location.hash && location.hash !== '#inizio') document.querySelector(location.hash)?.scrollIntoView({ behavior: 'instant' });
+    if (!enabled) { hero.style.removeProperty('--story-progress'); hero.style.removeProperty('--story-title'); hero.style.removeProperty('--story-wash'); hero.style.removeProperty('--story-dissolve'); }
+  }
+  function measure() { start = hero.getBoundingClientRect().top + scrollY - document.querySelector('.site-header').offsetHeight; range = Math.max(1, hero.offsetHeight - sticky.offsetHeight); onScroll(); }
+  function onScroll() { if (scrollY > 0 && active) interacted = true; if (interacted) loadScene(); target = Math.min(1, Math.max(0, (scrollY - start) / range)); requestFrame(); }
   function requestFrame() { if (!frame && moving() && active && !document.hidden) frame = requestAnimationFrame(tick); }
   function tick() {
     frame = 0;
@@ -59,6 +73,15 @@
     current += (target - current) * .11;
     if (Math.abs(target - current) < .0004) current = target;
     scene?.setProgress(current);
+    if (cinema) {
+      const smooth = (a, b) => { const p = Math.min(1, Math.max(0, (current - a) / (b - a))); return p * p * (3 - 2 * p); };
+      hero.style.setProperty('--story-progress', current);
+      hero.style.setProperty('--story-title', 1 - smooth(.18, .33));
+      hero.style.setProperty('--story-wash', smooth(.88, .95) * (1 - smooth(.95, 1)) * .6);
+      hero.style.setProperty('--story-dissolve', smooth(.94, 1));
+      const phase = current < .15 ? 0 : current < .35 ? 1 : current < .55 ? 2 : current < .72 ? 3 : current < .88 ? 4 : 5;
+      chapters.forEach((chapter, i) => { chapter.hidden = i !== phase; });
+    }
     if (scene) stage.dataset.progress = current.toFixed(4);
     if (current !== target) requestFrame();
   }
@@ -67,11 +90,11 @@
     loading = true;
     try {
       const module = await import('./scene.bundle.js');
-      if (!moving() || document.hidden) return;
+      if (!moving() || document.hidden || !active) return;
       scene = module.createScene(stage.querySelector('.scene-mount'), { lowPower: innerWidth < 700 || (navigator.hardwareConcurrency || 8) <= 4 });
-      if (scene) { scene.setProgress(current); stage.classList.add('scene-ready'); stage.dataset.renderer = 'webgl'; requestFrame(); }
-      else stage.dataset.renderer = 'fallback';
-    } catch { stage.dataset.renderer = 'fallback'; }
+      if (scene) { scene.setProgress(current); stage.classList.add('scene-ready'); stage.dataset.renderer = 'webgl'; setCinema(true); requestFrame(); }
+      else { stage.dataset.renderer = 'fallback'; root.classList.remove('story-layout'); measure(); }
+    } catch { stage.dataset.renderer = 'fallback'; root.classList.remove('story-layout'); measure(); }
     finally { loading = false; }
   }
   const heroObserver = new IntersectionObserver(([entry]) => { active = entry.isIntersecting; if (active) { loadScene(); requestFrame(); } else { cancelAnimationFrame(frame); frame = 0; } }, { rootMargin: '120px' });

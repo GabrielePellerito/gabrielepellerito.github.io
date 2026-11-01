@@ -6,5 +6,7 @@ import { resolve } from 'node:path';
 await build({ entryPoints: [resolve(root, 'src/scene.js')], outfile: resolve(root, 'assets/scene.bundle.js'), bundle: true, minify: true, format: 'esm', target: ['es2022'], legalComments: 'eof', treeShaking: true });
 await copyFile(resolve(root, 'node_modules/three/LICENSE'), resolve(root, 'assets/three-LICENSE.txt'));
 const hash = async (file) => createHash('sha256').update(await readFile(resolve(root, file))).digest('hex');
-await writeFile(resolve(root, 'assets/scene-manifest.json'), JSON.stringify({ source: await hash('src/scene.js'), robot: await hash('src/robot.js'), bundle: await hash('assets/scene.bundle.js') }, null, 2) + '\n');
+const modules = ['timeline', 'digging', 'terrain', 'atmosphere', 'cinematic-camera'];
+const inputs = Object.fromEntries(await Promise.all(modules.map(async name => [`src/${name}.js`, await hash(`src/${name}.js`)])));
+await writeFile(resolve(root, 'assets/scene-manifest.json'), JSON.stringify({ source: await hash('src/scene.js'), robot: await hash('src/robot.js'), inputs, bundle: await hash('assets/scene.bundle.js') }, null, 2) + '\n');
 console.log(`Scena WebGL compilata: ${Math.round((await stat(resolve(root, 'assets/scene.bundle.js'))).size / 1024)} KiB. Asset statico incluso nel commit.`);

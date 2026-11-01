@@ -20,11 +20,14 @@ test('homepage, SEO e risorse senza errori', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('vera rotazione WebGL interpolata sullo scroll, nessun loop a riposo', async ({ page }) => {
+test('cinematica WebGL interpolata nella sezione sticky, nessun loop a riposo', async ({ page }) => {
   await page.goto('/'); await activate(page);
   const stage = page.locator('.sculpture-stage');
   const initial = Number(await stage.getAttribute('data-rotation'));
-  await page.evaluate(() => scrollTo(0, 380));
+  await page.evaluate(() => {
+    const hero = document.querySelector('.hero'), sticky = document.querySelector('.hero-sticky');
+    scrollTo({ top: (hero.offsetHeight - sticky.offsetHeight) * .4, behavior: 'instant' });
+  });
   await expect.poll(async () => Math.abs(Number(await stage.getAttribute('data-rotation')) - initial)).toBeGreaterThan(.2);
   await page.waitForTimeout(1300);
   const steady = await stage.getAttribute('data-progress');

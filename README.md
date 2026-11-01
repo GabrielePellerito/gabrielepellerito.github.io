@@ -1,6 +1,6 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Braccio robotico artigianale · pala fissata al bordo opposto, movimento verso l'interno · 31 ottobre 2026.
+Braccio robotico artigianale · scavo, voragine e luce controllati dallo scroll · 1 novembre 2026.
 
 Nero profondo, nome monumentale e cognome a contorno. Robot in grafite e antracite, metallo satinato, dettagli argentati e luce di bordo più marcata.
 
@@ -83,17 +83,41 @@ La scatola resta ferma. Il primo pivot ruota tutta la struttura sovrastante; il 
 
 **Approssimazioni dichiarate:** proporzioni normalizzate senza unità fisiche; spessori, numero esatto degli strati e dei fissaggi; collegamenti posteriori, distanziali e geometria degli alberi; alloggiamento dello stepper dentro la scatola, non osservabile direttamente nelle foto; percorso semplificato dei cavi e gioco dei collegamenti; curvatura della pala. Incollaggi e irregolarità manuali sono semplificati, mantenendo l'assemblaggio a tavole. Non sono stati dedotti microcontrollori, driver, firmware, carichi o prestazioni reali.
 
-Sequenza di presentazione, con transizioni smoothstep e interpolazione dello scroll esistente:
+Sequenza cinematografica, con timeline deterministica e scroll nativo interpolato:
 
 | Progresso | Movimento principale |
 | --- | --- |
-| 0% | Base neutra, tavola inclinata, pala quasi orizzontale |
-| 0–25% | Rotazione della base |
-| 25–55% | Inclinazione del braccio |
-| 50–78% | Movimento indipendente della pala |
-| 82–100% | Piccolo assestamento dei tre giunti nella posa finale |
+| 0–15% | Presentazione del modello approvato, terreno integro |
+| 15–35% | I tre giunti portano il bordo di taglio alla superficie |
+| 35–55% | Penetrazione e raschiamento, detriti e prima cavità |
+| 55–72% | Ritrazione della pala, apertura della voragine e crepe |
+| 72–88% | Luce interna, raggi e particelle bianche |
+| 88–100% | Camera dentro l'apertura, dissolvenza e comparsa del vero contenuto Chi sono |
 
-Intervalli **solo visivi**, non limiti misurati: base 0°…48°, braccio −14°…1°, pala −16°…14°. Movimento deterministico e reversibile; nessun controllo del robot fisico.
+Intervalli cinematografici **solo visivi**, non limiti misurati: base 0°…10°, braccio −91°…−14°, pala −25°…16°. Sono tre rotazioni locali: la base del modello rimane ferma. `poseForProgress()` conserva le pose della precedente revisione per ispezioni meccaniche; la scena utilizza ora `timeline()` e `robot.setPose()` con la stessa gerarchia, senza cambiare il fissaggio approvato.
+
+### Architettura dello scrollytelling
+
+La Hero riserva circa **480svh su desktop e 340svh su mobile**, con un contenitore sticky alto quanto il viewport disponibile sotto la navbar. La composizione iniziale è predisposta prima del caricamento del 3D; lo spazio narrativo esteso viene attivato soltanto dopo la creazione riuscita della scena. Nessun blocco della rotellina, del touch o dello scroll del documento.
+
+| File | Responsabilità |
+| --- | --- |
+| `src/timeline.js` | Pose e sei fasi ricostruite da un unico progresso 0–1 |
+| `src/robot.js` | Geometria approvata e tre pivot; API aggiuntiva `setPose()` |
+| `src/digging.js` | Misura dei vertici reali della punta curva e del rinforzo frontale |
+| `src/terrain.js` | Superficie procedurale, pareti interne profonde, crepe e banco rialzato |
+| `src/atmosphere.js` | Detriti instanziati, raggi GLSL, particelle e luce puntiforme |
+| `src/cinematic-camera.js` | Inquadrature e attraversamento tridimensionale della cavità |
+| `src/scene.js` | Renderer, risorse, contesto WebGL e orchestrazione |
+| `assets/main.js`, `assets/style.css` | Scroll nativo, sticky, pausa, salto e transizione HTML |
+
+Il prototipo non viene allungato per raggiungere un pavimento arbitrario: il **banco rialzato è posizionato dalla geometria della punta alla posa di contatto del 35%**. Il banco è poco profondo nella direzione del braccio, lasciando servo e supporto fuori dalla faccia posteriore. La pala penetra durante la fase centrale e viene sollevata prima dell'apertura completa. Le pareti della cavità hanno profondità reale; il foro non è una decalcomania circolare.
+
+Detriti e particelle dipendono esclusivamente dal progresso e da semi fissi. Tornando indietro si ricostruiscono le stesse matrici, le crepe si ritirano e la superficie si richiude. Il terreno viene aggiornato solo quando varia l'apertura. I raggi sono volumi trasparenti simulati con shader additivi: non viene eseguito un costoso ray marching o un bloom a schermo intero. La luce puntiforme cambia i riflessi del robot; le ombre PCF seguono le articolazioni.
+
+La camera entra sotto il piano del terreno nell'ultima fase. Una luce graduale e la dissolvenza del canvas accompagnano l'ingresso della **sezione HTML originale `#chi-sono`**. Non vengono duplicati i contenuti del CV. Navbar, link “Salta l'introduzione”, anchor diretti e pausa permettono di raggiungere subito le informazioni. Senza WebGL, JavaScript, con risparmio dati o movimento ridotto non viene riservata la lunga sequenza.
+
+Questa è una visualizzazione narrativa, non una simulazione dinamica di terreni o carichi del servo: traiettorie dei detriti, terreno e raggi sono procedurali. Gli angoli non costituiscono specifiche del prototipo fisico.
 
 ### Vaschetta e fissaggio secondo il riferimento definitivo
 
@@ -136,11 +160,11 @@ Le viste tecniche evidenziano A (lunghezza) in ciano, B (albero) in ambra, C (bo
 
 `src/scene.js` conserva `createScene(mount, options)`, `setProgress(progress)` e `dispose()`. Il getter di sola lettura `diagnostics` serve ai test; non installa comandi, slider o globali nella pagina pubblica.
 
-Three.js 0.186.1, esbuild e licenza MIT già presenti. Camera prospettica, materiali PBR, environment PMREM generata in memoria, luci neutre e ombre PCF. Nessun modello GLB, HDR, texture pesante, CDN o libreria aggiuntiva. Le due palette usano la stessa cinematica e le stesse geometrie.
+Three.js 0.186.1, esbuild e licenza MIT già presenti. Camera prospettica, materiali PBR, environment PMREM generata in memoria, luci neutre e ombre PCF. Nessun modello GLB, HDR, texture pesante, CDN o libreria aggiuntiva. La nuova sequenza appartiene soltanto a Dark; il branch Light è invariato.
 
-`assets/main.js` è preservato: progressione normalizzata, requestAnimationFrame interpolato, IntersectionObserver, scroll nativo, menu accessibile e pausa persistente. Il bundle è caricato al primo scroll; il fallback WebP, generato dallo stesso modello, appare subito. `?render3d=1` forza il caricamento per revisione. Senza JavaScript, WebGL, con risparmio dati o movimento ridotto rimane l'immagine statica.
+`assets/main.js` mantiene menu, focus, microinterazioni e pausa persistente. Il controller misura la corsa della sezione sticky al resize e interpola il progresso con requestAnimationFrame. Il bundle è caricato al primo scroll; il fallback WebP appare subito, per evitare la compilazione WebGL nel percorso critico iniziale. `?render3d=1` forza il caricamento per revisione. Il generatore degli asset usa una scena isolata con inquadratura `poster`, evitando di catturare navbar o altri elementi HTML.
 
-DPR massimo 1.65 desktop e 1.25 mobile; meno segmenti e ombre a risoluzione ridotta sui dispositivi piccoli. Circa 35.8 mila triangoli desktop e 14.1 mila mobile. Nessun render a riposo o fuori dalla Hero; resize e visibilità sono gestiti. In caso di perdita reale del contesto appare il fallback; al ripristino viene rigenerata anche la environment PMREM. `dispose()` rilascia risorse, observer e renderer e termina il contesto WebGL.
+DPR massimo 1.65 desktop e 1.25 mobile; meno segmenti, particelle e ombre a risoluzione ridotta sui dispositivi piccoli. Le viste misurate restano sotto 45 mila triangoli desktop, 19 mila mobile e 250 draw call. Nessun render a riposo o fuori dalla Hero; resize e visibilità sono gestiti. In caso di perdita reale del contesto appare il fallback e lo spazio di scroll esteso viene rimosso; al ripristino viene rigenerata anche la environment PMREM. `dispose()` rilascia geometrie, materiali, risorse dei frammenti instanziati, observer e renderer e termina il contesto WebGL.
 
 Per disabilitare il movimento: pulsante nella navbar, preferenza di sistema **Riduci movimento**, oppure `design.motion: false` nel JSON seguito da rigenerazione. La preferenza di sistema prevale.
 
@@ -195,6 +219,9 @@ npm.cmd run assets
 npm.cmd run check
 npm.cmd run test:robot
 npm.cmd test -- --workers=2
+npm.cmd run screenshots:story
+# Video locale della sequenza avanti e indietro:
+node scripts/scrollytelling-review.mjs --video
 node scripts/check-cv.mjs --compare ../OTHER-DESIGN
 node scripts/robot-profile.mjs
 npm.cmd run audit
@@ -222,17 +249,19 @@ Edge/Chromium installato è il browser predefinito; `BROWSER_CHANNEL=chrome` sel
 
 ## Verifiche
 
-La suite Dark comprende **36 test Playwright e 7 test Node**. Copre contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I controlli geometrici misurano la perpendicolarità fra bordo corto C e albero B nello stesso sistema mondiale; verificano contatto e contenimento della faccia posteriore lungo 201 pose, coincidenza del bordo corto con quello superiore del supporto, orientamento neutro della pala conservato, asse originale del servo, raccordo solidale e separazione da tavola e motore. Un test dedicato verifica la corsa dall'esterno verso l'interno con il fissaggio sul bordo opposto. La tolleranza numerica per ortogonalità e distacco è 1e−7. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
+La suite Dark comprende **42 test Playwright e 10 test Node**. Copre contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I controlli geometrici misurano la perpendicolarità fra bordo corto C e albero B nello stesso sistema mondiale; verificano contatto e contenimento della faccia posteriore lungo 201 pose, coincidenza del bordo corto con quello superiore del supporto, orientamento neutro della pala conservato, asse originale del servo, raccordo solidale e separazione da tavola e motore. Un test dedicato verifica la corsa dall'esterno verso l'interno con il fissaggio sul bordo opposto. La tolleranza numerica per ortogonalità e distacco è 1e−7. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
 
 Axe applica i controlli WCAG 2.2 AA alla pagina e al menu mobile; non sostituisce una certificazione manuale. I controlli geometrici verificano gerarchia e distanze dalla base lungo 201 pose: non sono una simulazione della dinamica, dei carichi o una verifica CAD completa delle collisioni.
 
 Lighthouse misura il caricamento iniziale; `robot-profile.mjs` controlla separatamente il percorso WebGL dopo l'interazione. Emulazione mobile sul computer, non prova su smartphone fisico o misura INP sul campo.
 
-Misurazione locale finale del 28 ottobre 2026: Lighthouse **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, su desktop e mobile. LCP desktop/mobile: 1.5 s / 1.4 s; CLS 0 su entrambi; TBT desktop/mobile: 0 ms / 0 ms. Il campione WebGL non produce frame a riposo; dopo dispose il canvas è rimosso, le geometrie rilasciate e il contesto terminato. Sono risultati di laboratorio, non garanzie su dispositivi reali.
+Misurazione Lighthouse del 31 ottobre 2026 dopo l'ottimizzazione del caricamento: **100 performance, 100 accessibilità, 100 best practices, 100 SEO**, su desktop e mobile. LCP 1.4 s, CLS 0 e TBT 0 ms su entrambi. Questi punteggi riguardano il caricamento iniziale con fallback; non misurano la fluidità della sequenza WebGL. Il profilo interattivo separato registra mediana 4.2 ms e p95 4.3 ms sul computer di sviluppo, zero frame a riposo e zero geometrie dopo dispose. Il contatore Three.js mantiene una texture interna, con renderer distrutto e contesto GPU terminato. Sono risultati di laboratorio, non garanzie su dispositivi reali.
+
+La revisione locale è salvata in `artifacts/scrollytelling-review/`: sette screenshot desktop `scroll-00-hero.png`, `scroll-15-preparazione.png`, `scroll-35-contatto.png`, `scroll-50-scavo.png`, `scroll-70-voragine.png`, `scroll-85-aura.png`, `scroll-100-transizione.png`, quattro viste mobile, `verification.json` e `scrollytelling-desktop.webm`. Lo script muove lo scroll reale e verifica un contesto WebGL attivo; il video registra lo stesso browser. La cartella è esclusa da Git e dal server statico.
 
 ## Git e pubblicazione futura
 
-Per questo intervento e per i successivi miglioramenti del modello, salvo autorizzazione esplicita diversa, il solo branch modificabile è `design/dark-editorial-3d`. Eseguire push esclusivamente su `origin/design/dark-editorial-3d`. Main, Light e backup originale restano invariati. Non effettuare merge o pubblicazioni automatiche. I server locali non vengono arrestati dopo i test o il push.
+Per questo intervento e per i successivi miglioramenti del modello, salvo autorizzazione esplicita diversa, il solo branch modificabile è `design/dark-editorial-3d`. Eseguire push soltanto su richiesta esplicita del proprietario; questo task autorizza il push del risultato sul solo branch Dark. Main, Light e backup originale restano invariati, incluse eventuali modifiche locali già presenti. Non effettuare merge o pubblicazioni automatiche. I server locali non vengono arrestati dopo i test o il push.
 
 Per confrontare il codice usa i worktree esistenti, oppure `git diff main...design/dark-editorial-3d`. In un clone senza worktree usa `git switch` soltanto dopo aver salvato le modifiche e fermato il relativo server.
 
