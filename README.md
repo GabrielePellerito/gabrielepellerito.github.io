@@ -1,12 +1,12 @@
 # Gabriele Pellerito — Dark Editorial 3D
 
-Braccio robotico artigianale · confronto locale con Main · aggiornamento del 28 ottobre 2026.
+Braccio robotico artigianale · pala fissata al bordo opposto, movimento verso l'interno · 31 ottobre 2026.
 
 Nero profondo, nome monumentale e cognome a contorno. Robot in grafite e antracite, metallo satinato, dettagli argentati e luce di bordo più marcata.
 
 ## Tre anteprime indipendenti
 
-Il sito ufficiale https://gabrielepellerito.com/ viene servito da `main` con il design Dark e il braccio robotico. I due branch di design restano disponibili per lo sviluppo e il confronto locale. CNAME e configurazione del dominio sono preservati.
+Il sito ufficiale https://gabrielepellerito.com/ viene servito da `main` con la versione Dark approvata nel commit `25e931e`: pala fissata al bordo opposto del servo, con corsa verso l'interno. `design/dark-editorial-3d` resta l'unico branch di sviluppo del modello, salvo nuova indicazione esplicita del proprietario. Light e backup sono preservati, così come CNAME e configurazione del dominio.
 
 | Versione | Worktree locale | Branch | URL |
 | --- | --- | --- | --- |
@@ -56,9 +56,9 @@ In ciascun terminale, Ctrl+C interrompe soltanto quel server. Se una porta è gi
 
 ## Ricostruzione del prototipo
 
-Le fonti geometriche primarie sono le fotografie locali `IMG_0259.JPG` e `IMG_0261.JPG`. L'infografica è usata soltanto per presentazione e materiali: le sue quote non sono misure del prototipo. Il modello mantiene la scatola rettangolare, il basamento a strati, la tavola lunga inclinata, due servo, il supporto terminale e la pala curva sporgente. Non contiene una pinza, attuatori idraulici o un robot industriale aggiunto.
+Le fotografie locali `IMG_0259.JPG` e `IMG_0261.JPG` definiscono basamento, struttura principale e posizione dei motori. Per la sola vaschetta e il suo fissaggio prevale il riferimento definitivo fornito dal proprietario, `Braccio meccanico con vaschetta rialzata.png` (nome alternativo: `braccio_meccanico_con_vaschetta_rialzata.png`). I colori esplicativi di quell'immagine non sono riprodotti nel sito. Nessuna quota dei riferimenti generati è considerata una misura reale. Il modello mantiene scatola rettangolare, basamento a strati, tavola lunga inclinata e due servo; non contiene una pinza o attuatori idraulici aggiunti.
 
-`src/robot.js` è identico nei due branch. Costruisce vera geometria Three.js: tavole smussate, strati, corpi dei motori, alberi, squadrette estruse, viti, una pala a guscio chiuso e cavi tubolari. Nessuna fotografia viene usata come texture o Hero.
+`src/robot.js` costruisce vera geometria Three.js: tavole smussate, strati, corpi dei motori, alberi, squadrette estruse, viti, una pala a guscio chiuso e cavi tubolari. La correzione terminale è presente solo in questo branch; il codice Light conserva la versione precedente. Nessuna fotografia viene usata come texture o Hero.
 
 Gerarchia dei tre gradi di libertà:
 
@@ -68,9 +68,15 @@ RobotRoot
 └── BaseRotationPivot                  asse Y
     └── RotatingStructure / ArmServomotor
         └── ArmServoPivot              asse Z locale
-            └── ArmAssembly / ShovelServomotor
-                └── ShovelServoPivot  asse Z locale
-                    └── ShovelAssembly
+            └── ArmAssembly / ShovelServomotor (montaggio originale)
+                └── ShovelServoPivot (Z originale del servo)
+                    ├── ServoDrivePlate / TerminalPlateBridge
+                    └── MountingPlate (orientamento della pala conservato)
+                        ├── MountingPlateSurface
+                        └── ShovelAssembly (solidale alla piastra)
+                            ├── CurvedShovel
+                            ├── RearAttachmentEdge
+                            └── FreeFrontEdge
 ```
 
 La scatola resta ferma. Il primo pivot ruota tutta la struttura sovrastante; il secondo inclina la tavola e il gruppo terminale; il terzo muove soltanto pala e staffe collegate all'uscita. Il modello non è animato ruotando RobotRoot.
@@ -88,6 +94,43 @@ Sequenza di presentazione, con transizioni smoothstep e interpolazione dello scr
 | 82–100% | Piccolo assestamento dei tre giunti nella posa finale |
 
 Intervalli **solo visivi**, non limiti misurati: base 0°…48°, braccio −14°…1°, pala −16°…14°. Movimento deterministico e reversibile; nessun controllo del robot fisico.
+
+### Vaschetta e fissaggio secondo il riferimento definitivo
+
+Il riferimento definisce la forma della vaschetta aperta e il fissaggio alla piastra. La correzione richiesta dal proprietario **conserva l'orientamento della pala** (ruotata di +90° sulla verticale) e **l'orientamento originale del servo**, spostando il fissaggio sul bordo laterale opposto. Il vincolo è la perpendicolarità fra il **bordo corto** e l'albero del servo; non fra asse longitudinale e albero.
+
+| Elemento | Relazione nel riferimento locale del servo terminale |
+| --- | --- |
+| Asse longitudinale A | −X nel riferimento della piastra; dopo la rotazione verticale punta verso +Z mondiale nella posa neutra |
+| Asse del servo B | Z nel riferimento del braccio, ripristinato come prima; +Z mondiale nella posa neutra |
+| Bordo corto C | +X mondiale nella posa neutra, perpendicolare a B |
+| Relazione | C e B perpendicolari; A è parallelo a B. Durante lo scroll la pala segue l'asse originale del servo |
+| Superficie interna | Fondo sotto i bordi laterali; apertura +Y nella posa neutra |
+| Fissaggio | Intera flangia posteriore a contatto con la piastra; bordo corto coincidente con il bordo superiore del supporto e parallelo a X mondiale nella posa neutra |
+| Movimento | Piastra e vaschetta ruotano insieme sullo stesso pivot |
+
+Nel riferimento locale della piastra, la faccia a `x = −0.255` coincide con quella della flangia della vaschetta. Il bordo corto posteriore e il bordo superiore del supporto coincidono a `y = 0.18`; la pala è stata rialzata di 0.10 unità rispetto al montaggio precedente. Due fissaggi attraversano l'interfaccia lungo X locale. Il guscio conserva fondo ribassato, bordi rialzati, estremità arrotondata e spessore finito.
+
+Motore, albero e cablaggio terminale conservano il montaggio originale. `MountingPlate` mantiene la rotazione verticale della pala e viene traslata di −0.94 lungo X nel riferimento dell'uscita: il centro della vaschetta passa dal lato +0.47 al lato −0.47 dell'albero. Pala e piastra non vengono ruotate né specchiate. Il raccordo rigido e il suo fissaggio laterale seguono il nuovo lato, mantenendo il collegamento all'uscita del servo.
+
+Con gli stessi angoli, la corsa attiva del servo (progresso 0.50–0.78) porta la vaschetta dall'esterno verso il braccio. Il piccolo assestamento finale già presente rimane invariato; la posizione finale resta più interna di quella iniziale. Il test misura entrambi i bordi nel riferimento del braccio, escludendo il movimento della base e del primo servo, e verifica anche il ritorno alla posizione iniziale.
+
+Il centro e l'asse del giunto terminale, gli intervalli angolari, il basamento, il braccio principale, la forma e l'orientamento della pala sono invariati rispetto alla revisione `31f928b`. Materiali, luci, layout, contenuti, camera e API restano invariati. Tutte le dimensioni sono proporzioni normalizzate; raccordo, distanziale e fissaggi nascosti sono approssimazioni, non specifiche misurate del prototipo.
+
+Per ripetere la revisione dalla cartella Dark con il server 4174 attivo:
+
+```powershell
+node scripts/shovel-review.mjs
+
+# Per conservare separatamente le viste del fissaggio sul bordo opposto:
+$env:REVIEW_ARTIFACTS = Join-Path (Get-Location) 'artifacts/shovel-inward-mount'
+node scripts/shovel-review.mjs
+Remove-Item Env:REVIEW_ARTIFACTS
+```
+
+Lo script salva in `artifacts/shovel-correction/`: `shovel-right-orthographic.png`, `shovel-rear-orthographic.png`, `shovel-top-orthographic.png`, `shovel-attachment-closeup.png`, `shovel-neutral.png`, `shovel-tilted.png`, più la vista sinistra e le Hero desktop/mobile. Le tre viste ortogonali usano realmente `OrthographicCamera`, allineata agli assi mondiali: destra da +X, posteriore da −Z, superiore da +Y. A e B possono apparire puntiformi nelle viste lungo il rispettivo asse.
+
+Le viste tecniche evidenziano A (lunghezza) in ciano, B (albero) in ambra, C (bordo corto) in viola, pivot in magenta e contatto in verde. Il prodotto scalare verificato è `dot(C,B)`, insieme al distacco dalla piastra. Gli indicatori e le camere tecniche sono aggiunti soltanto alla risposta intercettata da Playwright e non sono presenti nel bundle pubblico. Ogni screenshot richiede un contesto WebGL attivo; `verification.json` registra proiezione, direzione camera, assi, contatto ed errori. Screenshot e immagini di riferimento sono esclusi da Git. Il vecchio `robot-fix-review.mjs` resta disponibile per le inquadrature della revisione precedente.
 
 ## Rendering e prestazioni
 
@@ -133,6 +176,9 @@ Canonico invariato: https://gabrielepellerito.com/. HTML semantico, ProfilePage/
 | `scripts/preview-worktrees.ps1` | Start, Status e Stop delle tre anteprime |
 | `scripts/robot-previews.mjs` | Screenshot delle tre pose e confronto Main |
 | `scripts/robot-harness.mjs` | Controllo della posa nel solo browser di test |
+| `scripts/robot-fix-review.mjs` | Tre pose Dark, dettaglio, profilo, apertura e vista superiore |
+| `scripts/shovel-review.mjs` | Revisione attuale: viste ortogonali e fissaggio della vaschetta |
+| `tests/shovel-mechanics.mjs`, `tests/shovel-debug.mjs` | Misure geometriche e indicatori esclusivamente per QA |
 | `scripts/robot-profile.mjs` | Campione locale di frame e rilascio risorse |
 | `tests/robot-model.test.mjs`, `tests/robot.spec.mjs` | Cinematica e WebGL reale |
 
@@ -176,7 +222,7 @@ Edge/Chromium installato è il browser predefinito; `BROWSER_CHANNEL=chrome` sel
 
 ## Verifiche
 
-Per ogni design: **34 test Playwright e 3 test Node**. Coprono contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale, tre giunti, reversibilità, geometria equivalente fra palette, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer.
+La suite Dark comprende **36 test Playwright e 7 test Node**. Copre contenuti/SEO, errori HTTP e JavaScript, navigazione/focus/menu, 320/375/768/1440/1920 px, no-JS/no-WebGL, movimento ridotto, pausa, scroll reale anche con inversioni rapide, tre giunti, reversibilità, semplificazione mobile, stabilizzazione, perdita/ripristino reale del contesto e distruzione del renderer. I controlli geometrici misurano la perpendicolarità fra bordo corto C e albero B nello stesso sistema mondiale; verificano contatto e contenimento della faccia posteriore lungo 201 pose, coincidenza del bordo corto con quello superiore del supporto, orientamento neutro della pala conservato, asse originale del servo, raccordo solidale e separazione da tavola e motore. Un test dedicato verifica la corsa dall'esterno verso l'interno con il fissaggio sul bordo opposto. La tolleranza numerica per ortogonalità e distacco è 1e−7. Il test delle palette riguarda le opzioni del modulo locale, non l'equivalenza con il branch Light.
 
 Axe applica i controlli WCAG 2.2 AA alla pagina e al menu mobile; non sostituisce una certificazione manuale. I controlli geometrici verificano gerarchia e distanze dalla base lungo 201 pose: non sono una simulazione della dinamica, dei carichi o una verifica CAD completa delle collisioni.
 
@@ -186,7 +232,7 @@ Misurazione locale finale del 28 ottobre 2026: Lighthouse **100 performance, 100
 
 ## Git e pubblicazione futura
 
-Gli aggiornamenti del sito ufficiale si pubblicano con un normale commit e push su `main`. I branch `design/dark-editorial-3d` e `design/light-minimal-3d` conservano i concept indipendenti. Il backup originale viene preservato.
+I miglioramenti del modello si sviluppano su `design/dark-editorial-3d`. Eseguire push soltanto quando il proprietario lo richiede esplicitamente. La pubblicazione sul dominio richiede una richiesta esplicita distinta: integrare la versione approvata in `main`, eseguire il push e verificare il sito dopo il deploy GitHub Pages. Light e backup originale restano invariati. I server locali non vengono arrestati dopo i test o il push.
 
 Per confrontare il codice usa i worktree esistenti, oppure `git diff main...design/dark-editorial-3d`. In un clone senza worktree usa `git switch` soltanto dopo aver salvato le modifiche e fermato il relativo server.
 

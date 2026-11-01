@@ -1,6 +1,7 @@
-// Dimensionless reconstruction from IMG_0259.JPG and IMG_0261.JPG.
+// Main structure: dimensionless reconstruction from IMG_0259.JPG / IMG_0261.JPG.
+// Terminal tray/mount: definitive "Braccio meccanico con vaschetta rialzata" reference.
 // No measurement, actuator specification or unseen electronics is inferred.
-import { Group, Mesh, MeshStandardMaterial, BoxGeometry, CylinderGeometry, Shape, ExtrudeGeometry, CatmullRomCurve3, TubeGeometry, Vector3, BufferGeometry, Float32BufferAttribute } from 'three';
+import { Group, Mesh, MeshStandardMaterial, BoxGeometry, CylinderGeometry, CatmullRomCurve3, TubeGeometry, Vector3, BufferGeometry, Float32BufferAttribute } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const rad = Math.PI / 180;
@@ -37,6 +38,7 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   const screw = (parent, x, y, z, axis = 'z') => {
     const holder = group('Fastener', parent, [x, y, z]);
     if (axis === 'z') holder.rotation.x = Math.PI / 2;
+    if (axis === 'x') holder.rotation.z = Math.PI / 2;
     mesh(holder, 'ScrewHead', screwGeo, silver);
     mesh(holder, 'ScrewSlot', slotGeo, graphite, [0, .009, 0]);
   };
@@ -86,22 +88,48 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   cylinder(arm, 'ArmHornSpacer', .025, .29, [0, .23, .20], silver, 'z');
   screw(arm, 0, 0, .373); screw(arm, 0, .23, .373);
   for (const y of [.55, 1.38, 2.26]) for (const x of [-.145, .145]) screw(arm, x, y, .074);
+  // Restore the ORIGINAL terminal servo and shaft, including their mounting
+  // position. Keep the tray's accepted +90-degree vertical orientation intact.
+  // The SHORT edge, not the longitudinal axis, is perpendicular to the shaft.
   servo(arm, 'ShovelServomotor', [0, 2.035, .205], true);
   cylinder(arm, 'ShovelOutputShaft', .05, .16, [0, 1.91, .355], silver, 'z');
   const shovelPivot = group('ShovelServoPivot', arm, [0, 1.91, .40]);
-  const shovel = group('ShovelAssembly', shovelPivot);
-  cylinder(shovel, 'ShovelServoHorn', .086, .025, [0, 0, .015], silver, 'z');
-  const bracket = new Shape(); bracket.moveTo(-.23, -.20); bracket.lineTo(-.32, .09); bracket.lineTo(-.09, .31); bracket.lineTo(.10, .10); bracket.lineTo(.10, -.20); bracket.closePath();
-  const bracketGeo = geometry(new ExtrudeGeometry(bracket, { depth: .025, bevelEnabled: true, bevelThickness: .006, bevelSize: .005, bevelSegments: 1, steps: 1 }));
-  for (const z of [-.33, .06]) mesh(shovel, 'ShovelSideBracket', bracketGeo, panel, [0, 0, z]);
-  screw(shovel, -.085, .15, .095); screw(shovel, -.18, -.08, .095);
-
-  // Thin closed shell, broad curved face and rolled leading lip. Not a photograph.
-  const nx = lowPower ? 14 : 26, nz = lowPower ? 8 : 14;
+  cylinder(shovelPivot, 'ShovelServoHorn', .086, .025, [0, 0, .015], silver, 'z');
+  cylinder(shovelPivot, 'ShovelHornStandoff', .052, .035, [0, 0, .043], silver, 'z');
+  // Rigid bridge from the original output to the retained tray plate.
+  // Hidden fastening dimensions are illustrative, not measured hardware.
+  box(shovelPivot, 'ServoDrivePlate', [.30, .34, .045], [-.07, .01, .065], panel, 0);
+  box(shovelPivot, 'TerminalPlateBridge', [.18, .30, .15], [-.13, .03, .155], edge, .004);
+  screw(shovelPivot, 0, 0, .098);
+  screw(shovelPivot, -.14, .11, .098);
+  // Move to the OPPOSITE lateral edge of the original servo. The plate/tray
+  // center shifts from +.47 to -.47 along the output frame's X, without any
+  // rotation or mirrored geometry. The active stroke now travels inward.
+  const mountingPlate = group('MountingPlate', shovelPivot, [-.94, 0, 0]);
+  mountingPlate.rotation.y = Math.PI / 2;
+  // Preserve the accepted orientation; only the lateral mounting side changes.
+  // In this frame the short edge is Z, the longitudinal direction is -X.
+  // At neutral they become world X and +Z; the restored shaft is world Z.
+  // Contact planes coincide at x=-.255. No decorative gap or independent pivot.
+  box(mountingPlate, 'MountingPlateSurface', [.035, .30, .86], [-.2375, .03, .47], panel, 0);
+  // The SHORT rear edge is now parallel to world X and flush with the TOP edge
+  // of the mounting surface (both at mounting-frame y=.18), not hanging below it.
+  const shovel = group('ShovelAssembly', mountingPlate, [0, .10, 0]);
+  // Shallow OPEN tray: lower interior, raised side/rear rims and rounded free end.
+  // The old rolled convex arch is replaced, not merely rotated. Dimensions are
+  // display proportions; hidden fixing details are not measured specifications.
+  const rearX = -.255, length = 1.40, halfWidth = .43, centerZ = .47;
+  const rimY = .08, depth = .16, thickness = .028, cornerRadius = .13;
+  const nx = lowPower ? 20 : 36, nz = lowPower ? 12 : 22;
   const positions = [], indices = [], row = nz + 1, surface = (nx + 1) * row;
   for (let side = 0; side < 2; side++) for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) {
     const t = i / nx, v = j / nz * 2 - 1;
-    positions.push(-.20 - t * 1.40, -.18 + .28 * (1 - v * v) + .045 * Math.pow(t, 12) - side * .027, -.14 + v * .36);
+    const fromFreeEnd = (1 - t) * length;
+    const width = fromFreeEnd < cornerRadius ? halfWidth - cornerRadius + Math.sqrt(cornerRadius ** 2 - (cornerRadius - fromFreeEnd) ** 2) : halfWidth;
+    const endRise = t ** 10 + (1 - t) ** 10;
+    const sideRise = v ** 6;
+    const rise = 1 - (1 - endRise) * (1 - sideRise);
+    positions.push(rearX - t * length, rimY - depth + depth * rise - side * thickness, centerZ + v * width);
   }
   for (let side = 0; side < 2; side++) for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
     const a = side * surface + i * row + j, b = a + row;
@@ -112,10 +140,12 @@ export function createRobot({ light = false, lowPower = false } = {}) {
   for (let j = 0; j < nz; j++) { seam(j + 1, j); seam(nx * row + j, nx * row + j + 1); }
   const shell = geometry(new BufferGeometry()); shell.setAttribute('position', new Float32BufferAttribute(positions, 3)); shell.setIndex(indices); shell.computeVertexNormals();
   mesh(shovel, 'CurvedShovel', shell, panel);
-  box(shovel, 'ShovelLowerRail', [1.42, .035, .035], [-.9, -.20, .22], laminate, .005);
-  box(shovel, 'ShovelRearRail', [1.42, .035, .035], [-.9, -.20, -.50], laminate, .005);
-  box(shovel, 'ShovelEndSupport', [.06, .065, .71], [-.23, -.20, -.14], edge, .007);
-  for (const x of [-.32, -1.43]) screw(shovel, x, -.18, .243);
+  // Rear flange's whole right face is flush against the plate's left face.
+  // Its screws run along X through this interface; the servo still rotates on Z.
+  box(shovel, 'RearAttachmentEdge', [.035, .188, .86], [rearX - .0175, -.014, centerZ], panel, 0);
+  box(shovel, 'FreeFrontEdge', [.026, .028, (halfWidth - cornerRadius) * 2], [rearX - length, rimY - .014, centerZ], laminate, .009);
+  for (const z of [.18, .76]) screw(shovel, rearX - .042, .048, z, 'x');
+  group('RearAttachmentDatum', shovel, [rearX, rimY, centerZ]);
   for (let i = 0; i < 3; i++) {
     const dx = i * .025;
     wire(arm, 'TerminalServoCable', [[.13 + dx, 2.17, .09], [.25 + dx, 1.91, .07], [.29 + dx, 1.13, .03], [.25 + dx, .44, .03], [.18 + dx, 0, .01], [.12 + dx, -.09, .02]], cableMat[i]);
@@ -123,7 +153,7 @@ export function createRobot({ light = false, lowPower = false } = {}) {
     wire(fixed, 'BaseSupplyCable', [[-.55, .81, .32 + dx], [-.79, .65, .39 + dx], [-.81, .32, .40 + dx], [-.77, .12, .39 + dx]], cableMat[i]);
   }
   for (const y of [.48, 1.22, 1.79]) box(arm, 'CableRetainer', [.11, .035, .085], [.255, y, .035], graphite, .004);
-  const tip = group('ShovelTip', shovel, [-1.6, -.06, -.14]);
+  const tip = group('ShovelTip', shovel, [rearX - length, rimY, centerZ]);
   let pose;
   function setProgress(p) { pose = poseForProgress(p); basePivot.rotation.y = pose.base; armPivot.rotation.z = pose.arm; shovelPivot.rotation.z = pose.shovel; root.updateMatrixWorld(true); }
   setProgress(0);

@@ -30,7 +30,8 @@ export function createScene(mount, { lowPower = false } = {}) {
   let disposed = false, lost = false, progress = 0, width = 0, height = 0, renderCount = 0;
   function frameCamera() {
     const distance = 8.9 * Math.max(1, .9 / camera.aspect);
-    camera.position.set(3.5 / 8.9 * distance + progress * .18, 2.9, 7.9 / 8.9 * distance);
+    // View the upward-open tray from above its rim, including the neutral pose.
+    camera.position.set(3.5 / 8.9 * distance + progress * .18, 5.7, 7.9 / 8.9 * distance);
     camera.lookAt(-.18, 1.95, 0); camera.updateProjectionMatrix();
   }
   function draw() { if (!disposed && !lost) { renderer.render(scene, camera); renderCount++; } }
